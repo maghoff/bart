@@ -1,6 +1,8 @@
 [package]
+authors = ["Magnus Hoff <maghoff@gmail.com>", "Johannes Hoff <johshoff@gmail.com>"]
 name = "stach"
 version = "0.1.0"
-authors = ["Magnus Hoff <maghoff@gmail.com>"]
 
 [dependencies]
+nom = "2.0.1"
+quick-error = "1.1.0"
