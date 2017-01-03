@@ -4,6 +4,7 @@ version = "0.1.0"
 dependencies = [
  "nom 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "quick-error 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "stach_derive 0.1.0",
 ]
 
 [[package]]
@@ -15,6 +16,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "quick-error"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "stach_derive"
+version = "0.1.0"
 
 [metadata]
 "checksum nom 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "ffc564b2727f758993db55d4ffed0d84bbd7f387a66509516768c8f786bb0b10"
