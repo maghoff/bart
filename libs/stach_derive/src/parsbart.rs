@@ -5,7 +5,7 @@ use std::fs::File;
 
 quick_error! {
     #[derive(Debug)]
-    enum Error {
+    pub enum Error {
         Io(err: io::Error) { from() }
         UnexpectedEOF
         Nom(err: ErrorKind) { from() }
@@ -30,7 +30,7 @@ fn brille(template: &str) -> IResult<&str, TextAndTag> {
     )
 }
 
-fn kake(filename: &str) -> Result<(), Error> {
+pub fn kake(filename: &str) -> Result<(), Error> {
     let mut f = File::open(filename)?;
     let mut buf = String::new();
     f.read_to_string(&mut buf)?;

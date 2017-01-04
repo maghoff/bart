@@ -1,6 +1,6 @@
 #![feature(proc_macro)]
 #![feature(proc_macro_lib)]
-#![recursion_limit = "128"]
+#![recursion_limit = "128"] // For quote!
 
 #[macro_use] extern crate nom;
 #[macro_use] extern crate quick_error;
@@ -29,7 +29,8 @@ pub fn stache_display(input: TokenStream) -> TokenStream {
         _ => panic!("#[derive(StacheDisplay)] requires #[template = \"...\"]")
     };
 
-    let _ = template; // TODO Parse template file
+    parsbart::kake(template).unwrap();
+    // TODO Use result from parsing
 
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();

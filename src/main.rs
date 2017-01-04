@@ -5,7 +5,7 @@
 mod display_html_safe;
 
 #[derive(StacheDisplay)]
-#[template = "template.mu.html"]
+#[template = "src/template.mu.html"]
 struct Greeting<'a> {
     name: &'a str,
     age: i32,
