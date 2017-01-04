@@ -17,8 +17,11 @@ pub fn stach(input: TokenStream) -> TokenStream {
     let s = input.to_string();
     let ast = syn::parse_macro_input(&s).unwrap();
 
+    let type_name = &ast.ident;
+    let generics = &ast.generics;
+
     let gen = quote! {
-        impl<'a> std::fmt::Display for Greeting<'a> {
+        impl #generics std::fmt::Display for #type_name #generics {
             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
                 use display_html_safe::DisplayHtmlSafe;
 
