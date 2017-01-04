@@ -25,10 +25,11 @@ pub fn stache_display(input: TokenStream) -> TokenStream {
                 use display_html_safe::DisplayHtmlSafe;
 
                 f.write_str("Hello, ")?;
-                DisplayHtmlSafe::fmt(&self.name, f)?;
+                DisplayHtmlSafe::safe_fmt(&self.name, f)?;
                 f.write_str(" (")?;
-                DisplayHtmlSafe::fmt(&self.age, f)?;
+                DisplayHtmlSafe::safe_fmt(&self.age, f)?;
                 f.write_str(")\n")?;
+
                 Ok(())
             }
         }
