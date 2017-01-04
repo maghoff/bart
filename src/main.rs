@@ -7,7 +7,7 @@
 mod parsbart;
 mod display_html_safe;
 
-#[derive(Stach)]
+#[derive(StacheDisplay)]
 struct Greeting<'a> {
     name: &'a str,
     age: i32,

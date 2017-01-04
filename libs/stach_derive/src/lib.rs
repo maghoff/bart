@@ -1,31 +1,38 @@
 #![feature(proc_macro)]
 #![feature(proc_macro_lib)]
+#![recursion_limit = "128"]
+
+#[macro_use] extern crate quote;
 
 extern crate proc_macro;
-//extern crate syn;
+extern crate syn;
 
 use proc_macro::TokenStream;
 use std::str::FromStr;
 
-#[proc_macro_derive(Stach)]
-pub fn stach(_input: TokenStream) -> TokenStream {
-    // Yield mock generated code for template
-    //     Hello, {{name}} ({{age}})
+// Yield mock generated code for template
+//     Hello, {{name}} ({{age}})
+#[proc_macro_derive(StacheDisplay)]
+pub fn stach(input: TokenStream) -> TokenStream {
+    let s = input.to_string();
+    let ast = syn::parse_macro_input(&s).unwrap();
 
-    TokenStream::from_str(r#"
-impl<'a> std::fmt::Display for Greeting<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        use display_html_safe::DisplayHtmlSafe;
+    let gen = quote! {
+        impl<'a> std::fmt::Display for Greeting<'a> {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                use display_html_safe::DisplayHtmlSafe;
 
-        f.write_str("Hello, ")?;
-        DisplayHtmlSafe::fmt(&self.name, f)?;
-        f.write_str(" (")?;
-        DisplayHtmlSafe::fmt(&self.age, f)?;
-        f.write_str(")\n")?;
-        Ok(())
-    }
-}
-"#).unwrap()
+                f.write_str("Hello, ")?;
+                DisplayHtmlSafe::fmt(&self.name, f)?;
+                f.write_str(" (")?;
+                DisplayHtmlSafe::fmt(&self.age, f)?;
+                f.write_str(")\n")?;
+                Ok(())
+            }
+        }
+    };
+
+    gen.parse().unwrap()
 }
 
 #[cfg(test)]
