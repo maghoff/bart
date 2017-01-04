@@ -16,11 +16,11 @@ pub fn stache_display(input: TokenStream) -> TokenStream {
     let s = input.to_string();
     let ast = syn::parse_macro_input(&s).unwrap();
 
-    let type_name = &ast.ident;
-    let generics = &ast.generics;
+    let name = &ast.ident;
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
     let gen = quote! {
-        impl #generics std::fmt::Display for #type_name #generics {
+        impl #impl_generics std::fmt::Display for #name #ty_generics #where_clause {
             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
                 use display_html_safe::DisplayHtmlSafe;
 
