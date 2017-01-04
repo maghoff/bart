@@ -11,10 +11,21 @@ use proc_macro::TokenStream;
 
 // Yield mock generated code for template
 //     Hello, {{name}} ({{age}})
-#[proc_macro_derive(StacheDisplay)]
+#[proc_macro_derive(StacheDisplay, attributes(template))]
 pub fn stache_display(input: TokenStream) -> TokenStream {
     let s = input.to_string();
     let ast = syn::parse_macro_input(&s).unwrap();
+
+    let template_attr = ast.attrs.iter()
+        .find(|&x| x.name() == "template")
+        .expect("#[derive(StacheDisplay)] requires #[template = \"...\"]");
+
+    let template = match &template_attr.value {
+        &syn::MetaItem::NameValue(_, syn::Lit::Str(ref template, _)) => template,
+        _ => panic!("#[derive(StacheDisplay)] requires #[template = \"...\"]")
+    };
+
+    let _ = template; // TODO Parse template file
 
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();

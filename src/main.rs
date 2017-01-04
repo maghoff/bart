@@ -8,6 +8,7 @@ mod parsbart;
 mod display_html_safe;
 
 #[derive(StacheDisplay)]
+#[template = "template.mu.html"]
 struct Greeting<'a> {
     name: &'a str,
     age: i32,
