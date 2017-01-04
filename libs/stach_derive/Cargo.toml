@@ -6,6 +6,8 @@ version = "0.1.0"
 [dependencies]
 quote = "0.3.10"
 syn = "0.10.5"
+nom = "2.0.1"
+quick-error = "1.1.0"
 
 [lib]
 proc-macro = true

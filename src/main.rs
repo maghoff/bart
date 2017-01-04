@@ -1,10 +1,7 @@
 #![feature(proc_macro)]
 #![feature(specialization)]
-#[macro_use] extern crate nom;
-#[macro_use] extern crate quick_error;
 #[macro_use] extern crate stach_derive;
 
-mod parsbart;
 mod display_html_safe;
 
 #[derive(StacheDisplay)]
