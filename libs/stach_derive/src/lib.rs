@@ -8,12 +8,11 @@ extern crate proc_macro;
 extern crate syn;
 
 use proc_macro::TokenStream;
-use std::str::FromStr;
 
 // Yield mock generated code for template
 //     Hello, {{name}} ({{age}})
 #[proc_macro_derive(StacheDisplay)]
-pub fn stach(input: TokenStream) -> TokenStream {
+pub fn stache_display(input: TokenStream) -> TokenStream {
     let s = input.to_string();
     let ast = syn::parse_macro_input(&s).unwrap();
 
