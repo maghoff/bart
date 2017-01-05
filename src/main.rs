@@ -1,4 +1,3 @@
-#![feature(proc_macro)]
 #![feature(specialization)]
 #[macro_use] extern crate stach_derive;
 
