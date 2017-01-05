@@ -9,10 +9,22 @@ mod display_html_safe;
 struct Greeting<'a> {
     name: &'a str,
     age: i32,
+    good: bool,
     stuff: Vec<i32>,
 }
 
 fn main() {
-    print!("{}", &Greeting { name: "Brille<tag attr=\"value\" attr2='value'>War & peas", age: 32, stuff: vec![] });
-    print!("{}", &Greeting { name: "Kinasjakk", age: 32, stuff: vec![1,2,3] });
+    print!("{}", &Greeting {
+        name: "Brille<tag attr=\"value\" attr2='value'>War & peas",
+        age: 32,
+        good: true,
+        stuff: vec![]
+    });
+
+    print!("{}", &Greeting {
+        name: "Kinasjakk",
+        age: 32,
+        good: false,
+        stuff: vec![1,2,3]
+    });
 }
