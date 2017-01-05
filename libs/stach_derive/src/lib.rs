@@ -35,16 +35,35 @@ pub fn stache_display(input: TokenStream) -> TokenStream {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
+    enum Token {
+        Literal(&'static str),
+        Interpolation(&'static str),
+    }
+
+    let mock_parsed = vec![
+        Token::Literal("Hello, "),
+        Token::Interpolation("name"),
+        Token::Literal(" ("),
+        Token::Interpolation("age"),
+        Token::Literal(")\n"),
+    ];
+
+    let generated = mock_parsed.into_iter().map(|token| match token {
+        Token::Literal(text) => {
+            quote! { f.write_str(#text)?; }
+        },
+        Token::Interpolation(ident_text) => {
+            let ident = syn::Ident::new(ident_text);
+            quote! { DisplayHtmlSafe::safe_fmt(&self.#ident, f)?; }
+        },
+    });
+
     let gen = quote! {
         impl #impl_generics ::std::fmt::Display for #name #ty_generics #where_clause {
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
                 use display_html_safe::DisplayHtmlSafe;
 
-                f.write_str("Hello, ")?;
-                DisplayHtmlSafe::safe_fmt(&self.name, f)?;
-                f.write_str(" (")?;
-                DisplayHtmlSafe::safe_fmt(&self.age, f)?;
-                f.write_str(")\n")?;
+                #(#generated)*
 
                 Ok(())
             }
