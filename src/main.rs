@@ -4,6 +4,10 @@
 
 mod display_html_safe;
 
+struct Nested {
+    a: i32,
+}
+
 #[derive(StacheDisplay)]
 #[template = "src/template.html"]
 struct Greeting<'a> {
@@ -11,6 +15,7 @@ struct Greeting<'a> {
     age: i32,
     good: bool,
     stuff: Vec<i32>,
+    nested: Nested,
 }
 
 fn main() {
@@ -18,13 +23,15 @@ fn main() {
         name: "Brille<tag attr=\"value\" attr2='value'>War & peas",
         age: 32,
         good: true,
-        stuff: vec![]
+        stuff: vec![],
+        nested: Nested { a: 10 },
     });
 
     print!("{}", &Greeting {
         name: "Kinasjakk",
         age: 32,
         good: false,
-        stuff: vec![1,2,3]
+        stuff: vec![1,2,3],
+        nested: Nested { a: 20 },
     });
 }

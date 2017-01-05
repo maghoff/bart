@@ -20,6 +20,7 @@ enum Ast {
     Iteration { ident: &'static str, nested: Box<Ast> },
     Conditional { ident: &'static str, nested: Box<Ast> },
     NegativeConditional { ident: &'static str, nested: Box<Ast> },
+    Scope { ident: &'static str, nested: Box<Ast> },
 }
 
 fn generate(node: Ast, scope_level: i32) -> quote::Tokens {
@@ -72,6 +73,17 @@ fn generate(node: Ast, scope_level: i32) -> quote::Tokens {
                 }
             }
         },
+        Scope { ident, nested } => {
+            let ident = syn::Ident::new(ident);
+            let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
+            let nested_generated = generate(*nested, scope_level + 1);
+            quote! {
+                {
+                    let ref #scope_variable = #ident;
+                    #nested_generated
+                }
+            }
+        },
     }
 }
 
@@ -117,6 +129,14 @@ pub fn stache_display(input: TokenStream) -> TokenStream {
         },
         Ast::Literal("Unescaped name: "),
         Ast::UnescapedInterpolation("self.name"),
+        Ast::Literal("\n"),
+        Ast::Scope {
+            ident: "self.nested",
+            nested: Box::new(Ast::Sequence(vec![
+                Ast::Literal("Nested scope: "),
+                Ast::Interpolation("_s1.a"),
+            ]))
+        },
         Ast::Literal("\n"),
     ]);
 
