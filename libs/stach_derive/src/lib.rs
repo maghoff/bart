@@ -20,19 +20,20 @@ enum Ast {
 }
 
 fn generate(node: Ast, scope_level: i32) -> quote::Tokens {
+    use Ast::*;
     match node {
-        Ast::Sequence(seq) => {
+        Sequence(seq) => {
             let items = seq.into_iter().map(|node| generate(node, scope_level));
             quote! { #(#items)* }
         },
-        Ast::Literal(text) => {
+        Literal(text) => {
             quote! { f.write_str(#text)?; }
         },
-        Ast::Interpolation(ident_text) => {
+        Interpolation(ident_text) => {
             let ident = syn::Ident::new(ident_text);
             quote! { DisplayHtmlSafe::safe_fmt(&#ident, f)?; }
         },
-        Ast::Iteration(ident_text, nested) => {
+        Iteration(ident_text, nested) => {
             let ident = syn::Ident::new(ident_text);
             let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
             let nested_generated = generate(*nested, scope_level + 1);
