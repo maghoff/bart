@@ -48,3 +48,14 @@ Fishsticks summary:
     {{.brille}}
     {{.nisse}}
 {{/kake}}
+
+
+Negative boolean:
+{{^bool?}}bool is false{{/bool}}
+
+Negative case for iterables? (How to implement?)
+{{^iterable}}iterable is empty{{/iterable}}
+
+Negative case for Result?
+{{#result}}Ok({{.}}){{/result}}
+{{^result}}Err({{.}}){{/result}}

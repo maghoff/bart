@@ -19,6 +19,7 @@ enum Ast {
     UnescapedInterpolation(&'static str),
     Iteration { ident: &'static str, nested: Box<Ast> },
     Conditional { ident: &'static str, nested: Box<Ast> },
+    NegativeConditional { ident: &'static str, nested: Box<Ast> },
 }
 
 fn generate(node: Ast, scope_level: i32) -> quote::Tokens {
@@ -51,9 +52,22 @@ fn generate(node: Ast, scope_level: i32) -> quote::Tokens {
         },
         Conditional { ident, nested } => {
             let ident = syn::Ident::new(ident);
-            let nested_generated = generate(*nested, scope_level);
+            let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
+            let nested_generated = generate(*nested, scope_level + 1);
             quote! {
-                if #ident {
+                if Into::into(#ident) {
+                    let ref #scope_variable = #ident;
+                    #nested_generated
+                }
+            }
+        },
+        NegativeConditional { ident, nested } => {
+            let ident = syn::Ident::new(ident);
+            let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
+            let nested_generated = generate(*nested, scope_level + 1);
+            quote! {
+                if Into::<bool>::into(#ident) == false {
+                    let ref #scope_variable = #ident;
                     #nested_generated
                 }
             }
@@ -87,6 +101,10 @@ pub fn stache_display(input: TokenStream) -> TokenStream {
         Ast::Conditional {
             ident: "self.good",
             nested: Box::new(Ast::Literal(" Good boy!")),
+        },
+        Ast::NegativeConditional {
+            ident: "self.good",
+            nested: Box::new(Ast::Literal(" BAD!")),
         },
         Ast::Literal("\n"),
         Ast::Iteration {
