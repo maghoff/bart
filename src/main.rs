@@ -1,4 +1,5 @@
-#![feature(specialization)]
+#![cfg_attr(feature = "specialization", feature(specialization))]
+
 #[macro_use] extern crate stach_derive;
 
 mod display_html_safe;

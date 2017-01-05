@@ -5,3 +5,7 @@ version = "0.1.0"
 
 [dependencies]
 stach_derive = { path = "libs/stach_derive" }
+
+[features]
+default = []
+specialization = []

@@ -36,7 +36,14 @@ pub trait DisplayHtmlSafe {
 }
 
 impl<T: Display> DisplayHtmlSafe for T {
+    #[cfg(feature = "specialization")]
     default fn safe_fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut escaping_writer = EscapingWriter::new(f);
+        write!(&mut escaping_writer, "{}", &self)
+    }
+
+    #[cfg(not(feature = "specialization"))]
+    fn safe_fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut escaping_writer = EscapingWriter::new(f);
         write!(&mut escaping_writer, "{}", &self)
     }
@@ -44,6 +51,7 @@ impl<T: Display> DisplayHtmlSafe for T {
 
 macro_rules! display_is_html_safe {
     ($x : ident) => {
+        #[cfg(feature = "specialization")]
         impl DisplayHtmlSafe for $x {
             fn safe_fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 Display::fmt(&self, f)
