@@ -5,20 +5,12 @@
 extern crate proc_macro;
 extern crate syn;
 
+mod ast;
 mod parsbart;
 
 use proc_macro::TokenStream;
 
-enum Ast {
-    Sequence(Vec<Ast>),
-    Literal(&'static str),
-    Interpolation(&'static str),
-    UnescapedInterpolation(&'static str),
-    Iteration { ident: &'static str, nested: Box<Ast> },
-    Conditional { ident: &'static str, nested: Box<Ast> },
-    NegativeConditional { ident: &'static str, nested: Box<Ast> },
-    Scope { ident: &'static str, nested: Box<Ast> },
-}
+use ast::Ast;
 
 fn generate(node: Ast, scope_level: i32) -> quote::Tokens {
     use Ast::*;
