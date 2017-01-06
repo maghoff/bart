@@ -1,14 +1,10 @@
 use ast::*;
 use ast::Ast::*;
 use nom::*;
-use std::fs::File;
-use std::io;
-use std::io::prelude::*;
 
 quick_error! {
     #[derive(Debug)]
     pub enum Error {
-        Io(err: io::Error) { from() }
         UnexpectedEOF
         Nom(err: ErrorKind) { from() }
     }
@@ -162,20 +158,12 @@ named!(template_file(&str) -> Ast,
     )
 );
 
-fn parse_str(buf: &str) -> Result<Ast, Error> {
+pub fn parse_str(buf: &str) -> Result<Ast, Error> {
     match template_file(&buf) {
         IResult::Done(_, parsed) => Ok(parsed),
         IResult::Error(err) => Err(err.into()),
         IResult::Incomplete(_) => Err(Error::UnexpectedEOF),
     }
-}
-
-pub fn parse_file(filename: &str) -> Result<Ast, Error> {
-    let mut f = File::open(filename)?;
-    let mut buf = String::new();
-    f.read_to_string(&mut buf)?;
-
-    parse_str(&buf)
 }
 
 #[cfg(test)]

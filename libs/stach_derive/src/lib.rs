@@ -11,6 +11,8 @@ mod parsbart;
 use proc_macro::TokenStream;
 
 use ast::Ast;
+use std::fs::File;
+use std::io::prelude::*;
 
 fn generate(node: Ast, scope_level: usize) -> quote::Tokens {
     use Ast::*;
@@ -76,21 +78,39 @@ fn generate(node: Ast, scope_level: usize) -> quote::Tokens {
     }
 }
 
-#[proc_macro_derive(StacheDisplay, attributes(template))]
+fn find_attr<'a>(attrs: &'a Vec<syn::Attribute>, name: &str) -> Option<&'a str> {
+    attrs.iter()
+        .find(|&x| x.name() == name)
+        .and_then(|ref attr| match &attr.value {
+            &syn::MetaItem::NameValue(_, syn::Lit::Str(ref template, _)) => Some(template),
+            _ => None
+        })
+        .map(|x| x.as_ref())
+}
+
+fn buf_file(filename: &str) -> String {
+    let mut f = File::open(filename)
+        .expect("Unable to open file for reading");
+    let mut buf = String::new();
+    f.read_to_string(&mut buf)
+        .expect("Unable to read file");
+
+    buf
+}
+
+#[proc_macro_derive(StacheDisplay, attributes(template, template_string))]
 pub fn stache_display(input: TokenStream) -> TokenStream {
     let s = input.to_string();
     let ast = syn::parse_macro_input(&s).unwrap();
 
-    let template_attr = ast.attrs.iter()
-        .find(|&x| x.name() == "template")
-        .expect("#[derive(StacheDisplay)] requires #[template = \"...\"]");
+    let template =
+        find_attr(&ast.attrs, "template").map(buf_file)
+            .or_else(||
+                find_attr(&ast.attrs, "template_string").map(|x| x.to_owned())
+            )
+        .expect("#[derive(StacheDisplay)] requires #[template = \"(filename)\"] or  #[template_string = \"...\"]");
 
-    let template = match &template_attr.value {
-        &syn::MetaItem::NameValue(_, syn::Lit::Str(ref template, _)) => template,
-        _ => panic!("#[derive(StacheDisplay)] requires #[template = \"...\"]")
-    };
-
-    let parsed = parsbart::parse_file(template).unwrap();
+    let parsed = parsbart::parse_str(&template).unwrap();
     let generated = generate(parsed, 1);
 
     let name = &ast.ident;
