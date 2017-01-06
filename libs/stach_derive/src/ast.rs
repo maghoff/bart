@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Name {
     pub dots: usize,
     pub name: Option<String>,
@@ -17,7 +17,7 @@ impl Name {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Ast {
     Sequence(Vec<Ast>),
     Literal(String),

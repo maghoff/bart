@@ -1,9 +1,9 @@
 use ast::*;
 use ast::Ast::*;
 use nom::*;
+use std::fs::File;
 use std::io;
 use std::io::prelude::*;
-use std::fs::File;
 
 quick_error! {
     #[derive(Debug)]
@@ -162,11 +162,7 @@ named!(template_file(&str) -> Ast,
     )
 );
 
-pub fn parse_file(filename: &str) -> Result<Ast, Error> {
-    let mut f = File::open(filename)?;
-    let mut buf = String::new();
-    f.read_to_string(&mut buf)?;
-
+fn parse_str(buf: &str) -> Result<Ast, Error> {
     match template_file(&buf) {
         IResult::Done(_, parsed) => Ok(parsed),
         IResult::Error(err) => Err(err.into()),
@@ -174,12 +170,54 @@ pub fn parse_file(filename: &str) -> Result<Ast, Error> {
     }
 }
 
+pub fn parse_file(filename: &str) -> Result<Ast, Error> {
+    let mut f = File::open(filename)?;
+    let mut buf = String::new();
+    f.read_to_string(&mut buf)?;
+
+    parse_str(&buf)
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
 
     #[test]
-    fn test() {
-        kake("src/template.mu.html").unwrap();
+    fn it_parses_simple_stuff_correctly() {
+        assert_eq!(
+            parse_str("Hello {{lol}}").unwrap(),
+            Sequence(vec![
+                Sequence(vec![
+                    Literal("Hello ".to_owned()),
+                    Interpolation(Name { dots: 0, name: Some("lol".to_owned()) })
+                ]),
+                Literal("".to_owned())
+            ])
+        );
+    }
+
+    #[test]
+    fn it_parses_literal_text_only() {
+        assert_eq!(
+            parse_str("Hello").unwrap(),
+            Sequence(vec![
+                Sequence(vec![]),
+                Literal("Hello".to_owned())
+            ])
+        );
+    }
+
+    #[test]
+    fn it_parses_trailing_text() {
+        assert_eq!(
+            parse_str("Hello {{name}}!").unwrap(),
+            Sequence(vec![
+                Sequence(vec![
+                    Literal("Hello ".to_owned()),
+                    Interpolation(Name { dots: 0, name: Some("name".to_owned()) })
+                ]),
+                Literal("!".to_owned())
+            ])
+        );
     }
 }
