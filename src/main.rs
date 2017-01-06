@@ -2,8 +2,8 @@
 
 #[macro_use] extern crate stach_derive;
 
-mod display_html_safe;
-
+#[derive(StacheDisplay)]
+#[template = "src/null-template.html"]
 struct Nested {
     a: i32,
 }

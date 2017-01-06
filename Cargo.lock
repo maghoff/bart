@@ -1,7 +1,8 @@
 [root]
-name = "stach"
+name = "stach-test"
 version = "0.1.0"
 dependencies = [
+ "stach 0.1.0",
  "stach_derive 0.1.0",
 ]
 
@@ -19,6 +20,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "quote"
 version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "stach"
+version = "0.1.0"
 
 [[package]]
 name = "stach_derive"

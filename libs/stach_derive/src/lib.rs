@@ -24,11 +24,11 @@ fn generate(node: Ast, scope_level: usize) -> quote::Tokens {
         },
         Interpolation(name) => {
             let name = syn::Ident::new(name.resolve(scope_level));
-            quote! { DisplayHtmlSafe::safe_fmt(&#name, f)?; }
+            quote! { _stach::DisplayHtmlSafe::safe_fmt(&#name, f)?; }
         },
         UnescapedInterpolation(name) => {
             let name = syn::Ident::new(name.resolve(scope_level));
-            quote! { Display::fmt(&#name, f)?; }
+            quote! { ::std::fmt::Display::fmt(&#name, f)?; }
         },
         Iteration { name, nested } => {
             let name = syn::Ident::new(name.resolve(scope_level));
@@ -96,18 +96,24 @@ pub fn stache_display(input: TokenStream) -> TokenStream {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
+    let dummy_const = syn::Ident::new(format!("_IMPL_STACHE_DISPLAY_FOR_{}", &name));
+
     let gen = quote! {
-        impl #impl_generics ::std::fmt::Display for #name #ty_generics #where_clause {
-            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                use ::std::fmt::Display;
-                use display_html_safe::DisplayHtmlSafe;
-                let ref _s0 = self;
+        #[allow(non_upper_case_globals, unused_attributes, unused_qualifications)]
+        const #dummy_const: () = {
+            extern crate stach as _stach;
 
-                #generated
+            #[automatically_derived]
+            impl #impl_generics ::std::fmt::Display for #name #ty_generics #where_clause {
+                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                    let ref _s0 = self;
 
-                Ok(())
+                    #generated
+
+                    Ok(())
+                }
             }
-        }
+        };
     };
 
     gen.parse().unwrap()
