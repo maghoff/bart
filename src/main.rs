@@ -19,7 +19,7 @@ struct Greeting<'a> {
 }
 
 fn main() {
-    print!("{}", &Greeting {
+    println!("{}", &Greeting {
         name: "Brille<tag attr=\"value\" attr2='value'>War & peas",
         age: 32,
         good: true,
@@ -27,7 +27,7 @@ fn main() {
         nested: Nested { a: 10 },
     });
 
-    print!("{}", &Greeting {
+    println!("{}", &Greeting {
         name: "Kinasjakk",
         age: 32,
         good: false,

@@ -1,61 +1,14 @@
 Hello, {{name}} ({{age}})
 
-Liste:
-{{#liste}}
- - {{.}}
-{{/liste}}
+{{#stuff}}
+    <li>{{.}}</li>{{/stuff}}
 
-Fishsticks summary:
-{{#folk}}
- - {{.navn}} {{#.bestilling}}{{.nr}}. {{..navn}}{{/.bestilling}}
-{{/folk}}
+{{#good?}}Good boy!{{/good}}
 
-{{#folk}}
-{{>parshul .fe}}
-{{/folk}}
+Unescaped name: {{{name}}}
 
-{{#bool?}}
-{{/bool}}
+{{#nested.}}
+    Nested scope: {{.a}}
+{{/nested}}
 
-{{{html}}}
-{{%html}}
-{{html:unescaped}}
-{{num:.2f}}
-
-{{num|format(2f)}}
-
-
-{{=<% %>=}}
-
-<%#folk%>
-<%name%>
-<%/folk%>
-
-{{}}
-
-<%={{ }}=%>
-
-
-{
-    kake: {
-        brille: 1,
-        nisse: 2
-    }
-}
-
-{{kake.brille}}
-{{#kake.}}
-    {{.brille}}
-    {{.nisse}}
-{{/kake}}
-
-
-Negative boolean:
-{{^bool?}}bool is false{{/bool}}
-
-Negative case for iterables? (How to implement?)
-{{^iterable}}iterable is empty{{/iterable}}
-
-Negative case for Result?
-{{#result}}Ok({{.}}){{/result}}
-{{^result}}Err({{.}}){{/result}}
+Direct: {{nested.a}}

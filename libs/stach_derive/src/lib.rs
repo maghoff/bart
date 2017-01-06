@@ -12,7 +12,7 @@ use proc_macro::TokenStream;
 
 use ast::Ast;
 
-fn generate(node: Ast, scope_level: i32) -> quote::Tokens {
+fn generate(node: Ast, scope_level: usize) -> quote::Tokens {
     use Ast::*;
     match node {
         Sequence(seq) => {
@@ -22,53 +22,53 @@ fn generate(node: Ast, scope_level: i32) -> quote::Tokens {
         Literal(text) => {
             quote! { f.write_str(#text)?; }
         },
-        Interpolation(ident) => {
-            let ident = syn::Ident::new(ident);
-            quote! { DisplayHtmlSafe::safe_fmt(&#ident, f)?; }
+        Interpolation(name) => {
+            let name = syn::Ident::new(name.resolve(scope_level));
+            quote! { DisplayHtmlSafe::safe_fmt(&#name, f)?; }
         },
-        UnescapedInterpolation(ident) => {
-            let ident = syn::Ident::new(ident);
-            quote! { Display::fmt(&#ident, f)?; }
+        UnescapedInterpolation(name) => {
+            let name = syn::Ident::new(name.resolve(scope_level));
+            quote! { Display::fmt(&#name, f)?; }
         },
-        Iteration { ident, nested } => {
-            let ident = syn::Ident::new(ident);
+        Iteration { name, nested } => {
+            let name = syn::Ident::new(name.resolve(scope_level));
             let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
             let nested_generated = generate(*nested, scope_level + 1);
             quote! {
-                for ref #scope_variable in &#ident {
+                for ref #scope_variable in &#name {
                     #nested_generated
                 }
             }
         },
-        Conditional { ident, nested } => {
-            let ident = syn::Ident::new(ident);
+        Conditional { name, nested } => {
+            let name = syn::Ident::new(name.resolve(scope_level));
             let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
             let nested_generated = generate(*nested, scope_level + 1);
             quote! {
-                if Into::into(#ident) {
-                    let ref #scope_variable = #ident;
+                if Into::into(#name) {
+                    let ref #scope_variable = #name;
                     #nested_generated
                 }
             }
         },
-        NegativeConditional { ident, nested } => {
-            let ident = syn::Ident::new(ident);
+        NegativeConditional { name, nested } => {
+            let name = syn::Ident::new(name.resolve(scope_level));
             let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
             let nested_generated = generate(*nested, scope_level + 1);
             quote! {
-                if Into::<bool>::into(#ident) == false {
-                    let ref #scope_variable = #ident;
+                if Into::<bool>::into(#name) == false {
+                    let ref #scope_variable = #name;
                     #nested_generated
                 }
             }
         },
-        Scope { ident, nested } => {
-            let ident = syn::Ident::new(ident);
+        Scope { name, nested } => {
+            let name = syn::Ident::new(name.resolve(scope_level));
             let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
             let nested_generated = generate(*nested, scope_level + 1);
             quote! {
                 {
-                    let ref #scope_variable = #ident;
+                    let ref #scope_variable = #name;
                     #nested_generated
                 }
             }
@@ -90,46 +90,8 @@ pub fn stache_display(input: TokenStream) -> TokenStream {
         _ => panic!("#[derive(StacheDisplay)] requires #[template = \"...\"]")
     };
 
-    parsbart::kake(template).unwrap();
-    // TODO Use result from parsing
-
-    let mock_parsed = Ast::Sequence(vec![
-        Ast::Literal("Hello, "),
-        Ast::Interpolation("self.name"),
-        Ast::Literal(" ("),
-        Ast::Interpolation("self.age"),
-        Ast::Literal(")"),
-        Ast::Conditional {
-            ident: "self.good",
-            nested: Box::new(Ast::Literal(" Good boy!")),
-        },
-        Ast::NegativeConditional {
-            ident: "self.good",
-            nested: Box::new(Ast::Literal(" BAD!")),
-        },
-        Ast::Literal("\n"),
-        Ast::Iteration {
-            ident: "self.stuff",
-            nested: Box::new(Ast::Sequence(vec![
-                Ast::Literal("<li>"),
-                Ast::Interpolation("_s1"),
-                Ast::Literal("</li>\n"),
-            ]))
-        },
-        Ast::Literal("Unescaped name: "),
-        Ast::UnescapedInterpolation("self.name"),
-        Ast::Literal("\n"),
-        Ast::Scope {
-            ident: "self.nested",
-            nested: Box::new(Ast::Sequence(vec![
-                Ast::Literal("Nested scope: "),
-                Ast::Interpolation("_s1.a"),
-            ]))
-        },
-        Ast::Literal("\n"),
-    ]);
-
-    let generated = generate(mock_parsed, 1);
+    let parsed = parsbart::parse_file(template).unwrap();
+    let generated = generate(parsed, 1);
 
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();

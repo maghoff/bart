@@ -1,0 +1,61 @@
+Hello, {{name}} ({{age}})
+
+Liste:
+{{#liste}}
+ - {{.}}
+{{/liste}}
+
+Fishsticks summary:
+{{#folk}}
+ - {{.navn}} {{#.bestilling}}{{.nr}}. {{..navn}}{{/.bestilling}}
+{{/folk}}
+
+{{#folk}}
+{{>parshul .fe}}
+{{/folk}}
+
+{{#bool?}}
+{{/bool}}
+
+{{{html}}}
+{{%html}}
+{{html:unescaped}}
+{{num:.2f}}
+
+{{num|format(2f)}}
+
+
+{{=<% %>=}}
+
+<%#folk%>
+<%name%>
+<%/folk%>
+
+{{}}
+
+<%={{ }}=%>
+
+
+{
+    kake: {
+        brille: 1,
+        nisse: 2
+    }
+}
+
+{{kake.brille}}
+{{#kake.}}
+    {{.brille}}
+    {{.nisse}}
+{{/kake}}
+
+
+Negative boolean:
+{{^bool?}}bool is false{{/bool}}
+
+Negative case for iterables? (How to implement?)
+{{^iterable}}iterable is empty{{/iterable}}
+
+Negative case for Result?
+{{#result}}Ok({{.}}){{/result}}
+{{^result}}Err({{.}}){{/result}}
