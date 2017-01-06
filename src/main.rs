@@ -1,5 +1,3 @@
-#![cfg_attr(feature = "specialization", feature(specialization))]
-
 #[macro_use] extern crate stach_derive;
 
 #[derive(StacheDisplay)]
@@ -21,7 +19,7 @@ struct Greeting<'a> {
 fn main() {
     println!("{}", &Greeting {
         name: "Brille<tag attr=\"value\" attr2='value'>War & peas",
-        age: 32,
+        age: 31,
         good: true,
         stuff: vec![],
         nested: Nested { a: 10 },
