@@ -75,3 +75,31 @@ display_is_html_safe!(f32);
 display_is_html_safe!(f64);
 
 display_is_html_safe!(bool);
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    struct Fake<'a> { text: &'a str }
+    impl<'a> Display for Fake<'a> {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            self.text.safe_fmt(f)
+        }
+    }
+
+    #[test]
+    fn it_works() {
+        assert_eq!(
+            " &lt; &amp; &quot; &apos; ",
+            format!("{}", Fake { text: " < & \" ' " })
+        );
+    }
+
+    #[test]
+    fn it_handles_tight_packed_string() {
+        assert_eq!(
+            "&lt;&amp;&quot;&apos;",
+            format!("{}", Fake { text: "<&\"'" })
+        );
+    }
+}

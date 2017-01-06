@@ -5,6 +5,7 @@ dependencies = [
  "nom 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "quick-error 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 0.3.10 (registry+https://github.com/rust-lang/crates.io-index)",
+ "stach 0.1.0",
  "syn 0.10.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -22,6 +23,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "quote"
 version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "stach"
+version = "0.1.0"
 
 [[package]]
 name = "syn"

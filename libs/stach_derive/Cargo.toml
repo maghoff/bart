@@ -9,5 +9,8 @@ syn = "0.10.5"
 nom = "2.0.1"
 quick-error = "1.1.0"
 
+[dev-dependencies]
+stach = { path = "../stach" }
+
 [lib]
 proc-macro = true
