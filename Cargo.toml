@@ -1,0 +1,8 @@
+[project]
+name = "bart-examples"
+version = "0.0.0"
+publish = false
+
+[dev-dependencies]
+bart = { path = "libs/bart" }
+bart_derive = { path = "libs/bart_derive" }
