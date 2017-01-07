@@ -1,7 +1,13 @@
 [package]
-authors = ["Magnus Hoff <maghoff@gmail.com>", "Johannes Hoff <johshoff@gmail.com>"]
 name = "stach_derive"
 version = "0.1.0"
+authors = ["Magnus Hoff <maghoff@gmail.com>", "Johannes Hoff <johshoff@gmail.com>"]
+license = "MIT"
+description = "#[derive(StacheDisplay)] for supporting the stache package"
+#documentation = "https://docs.rs/stach_derive/0.1.0/stach_derive/"
+repository = "https://github.com/maghoff/stache"
+#readme = "README.md"
+keywords = ["web", "templating"]
 
 [dependencies]
 quote = "0.3.10"
@@ -10,7 +16,7 @@ nom = "2.0.1"
 quick-error = "1.1.0"
 
 [dev-dependencies]
-stach = { path = "../stach" }
+stach = { version = "0.1.0", path = "../stach" }
 
 [lib]
 proc-macro = true
