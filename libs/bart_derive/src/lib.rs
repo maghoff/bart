@@ -26,7 +26,7 @@ fn generate(node: Ast, scope_level: usize) -> quote::Tokens {
         },
         Interpolation(name) => {
             let name = syn::Ident::new(name.resolve(scope_level));
-            quote! { _stach::DisplayHtmlSafe::safe_fmt(&#name, f)?; }
+            quote! { _bart::DisplayHtmlSafe::safe_fmt(&#name, f)?; }
         },
         UnescapedInterpolation(name) => {
             let name = syn::Ident::new(name.resolve(scope_level));
@@ -98,8 +98,8 @@ fn buf_file(filename: &str) -> String {
     buf
 }
 
-#[proc_macro_derive(StacheDisplay, attributes(template, template_string))]
-pub fn stache_display(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(BartDisplay, attributes(template, template_string))]
+pub fn bart_display(input: TokenStream) -> TokenStream {
     let s = input.to_string();
     let ast = syn::parse_macro_input(&s).unwrap();
 
@@ -108,7 +108,7 @@ pub fn stache_display(input: TokenStream) -> TokenStream {
             .or_else(||
                 find_attr(&ast.attrs, "template_string").map(|x| x.to_owned())
             )
-        .expect("#[derive(StacheDisplay)] requires #[template = \"(filename)\"] or  #[template_string = \"...\"]");
+        .expect("#[derive(BartDisplay)] requires #[template = \"(filename)\"] or  #[template_string = \"...\"]");
 
     let parsed = parsbart::parse_str(&template).unwrap();
     let generated = generate(parsed, 1);
@@ -116,12 +116,12 @@ pub fn stache_display(input: TokenStream) -> TokenStream {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
-    let dummy_const = syn::Ident::new(format!("_IMPL_STACHE_DISPLAY_FOR_{}", &name));
+    let dummy_const = syn::Ident::new(format!("_IMPL_BART_DISPLAY_FOR_{}", &name));
 
     let gen = quote! {
         #[allow(non_upper_case_globals, unused_attributes, unused_qualifications)]
         const #dummy_const: () = {
-            extern crate stach as _stach;
+            extern crate bart as _bart;
 
             #[automatically_derived]
             impl #impl_generics ::std::fmt::Display for #name #ty_generics #where_clause {

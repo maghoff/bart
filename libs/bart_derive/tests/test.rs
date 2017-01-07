@@ -1,8 +1,8 @@
-#[macro_use] extern crate stach_derive;
+#[macro_use] extern crate bart_derive;
 
 #[test]
 fn it_works() {
-    #[derive(StacheDisplay)]
+    #[derive(BartDisplay)]
     #[template_string="Hello, {{name}}"]
     struct Test { name: String }
 
@@ -14,7 +14,7 @@ fn it_works() {
 
 #[test]
 fn it_can_borrow() {
-    #[derive(StacheDisplay)]
+    #[derive(BartDisplay)]
     #[template_string="Hello, {{name}}"]
     struct Test<'a> { name: &'a str }
 
@@ -26,7 +26,7 @@ fn it_can_borrow() {
 
 #[test]
 fn it_performs_escaping() {
-    #[derive(StacheDisplay)]
+    #[derive(BartDisplay)]
     #[template_string="{{txt}}"]
     struct Test<'a> { txt: &'a str }
 
@@ -38,7 +38,7 @@ fn it_performs_escaping() {
 
 #[test]
 fn it_passes_through() {
-    #[derive(StacheDisplay)]
+    #[derive(BartDisplay)]
     #[template_string="{{{txt}}}"]
     struct Test<'a> { txt: &'a str }
 
@@ -50,7 +50,7 @@ fn it_passes_through() {
 
 #[test]
 fn it_can_iterate() {
-    #[derive(StacheDisplay)]
+    #[derive(BartDisplay)]
     #[template_string="{{#vec}}{{.}}{{/vec}}"]
     struct Test { vec: Vec<i32> }
 
@@ -62,7 +62,7 @@ fn it_can_iterate() {
 
 #[test]
 fn it_can_iterate_option() {
-    #[derive(StacheDisplay)]
+    #[derive(BartDisplay)]
     #[template_string="{{#a}}({{.}}){{/a}}"]
     struct Test { a: Option<i32> }
 
@@ -81,7 +81,7 @@ fn it_can_iterate_option() {
 fn it_can_access_nested_fields() {
     struct Nested { a: i32 }
 
-    #[derive(StacheDisplay)]
+    #[derive(BartDisplay)]
     #[template_string="{{nested.a}}"]
     struct Test { nested: Nested }
 
@@ -95,7 +95,7 @@ fn it_can_access_nested_fields() {
 fn it_can_scope_into_nested_values() {
     struct Nested { a: i32 }
 
-    #[derive(StacheDisplay)]
+    #[derive(BartDisplay)]
     #[template_string="{{#nested.}}{{.a}}{{/nested}}"]
     struct Test { nested: Nested }
 
@@ -107,7 +107,7 @@ fn it_can_scope_into_nested_values() {
 
 #[test]
 fn it_supports_boolean_scope() {
-    #[derive(StacheDisplay)]
+    #[derive(BartDisplay)]
     #[template_string="{{#a?}}yes{{/a}}"]
     struct Test { a: bool }
 

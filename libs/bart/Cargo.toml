@@ -1,11 +1,11 @@
 [package]
-name = "stach"
+name = "bart"
 version = "0.1.0"
 authors = ["Magnus Hoff <maghoff@gmail.com>"]
 license = "MIT"
 description = "A compile time templating language inspired by Mustache"
-#documentation = "https://docs.rs/stach/0.1.0/stach/"
-repository = "https://github.com/maghoff/stache"
+#documentation = "https://docs.rs/bart/0.1.0/bart/"
+repository = "https://github.com/maghoff/bart"
 #readme = "README.md"
 keywords = ["web", "templating"]
 

@@ -122,7 +122,7 @@ named!(interpolation_tag(&str) -> Ast,
     )
 );
 
-named!(stache_tag(&str) -> Ast,
+named!(bart_tag(&str) -> Ast,
     alt!(
         scope |
         unescaped_interpolation_tag |
@@ -132,7 +132,7 @@ named!(stache_tag(&str) -> Ast,
 
 named!(text_or_tag(&str) -> Ast,
     alt!(
-        stache_tag |
+        bart_tag |
         map_res!(
             take_until!("{{"),
             |x: &str| match x.len() {
