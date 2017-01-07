@@ -1,10 +1,10 @@
 [package]
 name = "bart_derive"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["Magnus Hoff <maghoff@gmail.com>", "Johannes Hoff <johshoff@gmail.com>"]
 license = "MIT"
 description = "#[derive(BartDisplay)] implementation for supporting the bart package"
-#documentation = "https://docs.rs/bart_derive/0.1.0/bart_derive/"
+#documentation = "https://docs.rs/bart_derive/0.0.1/bart_derive/"
 repository = "https://github.com/maghoff/bart"
 #readme = "README.md"
 keywords = ["web", "templating"]
@@ -16,7 +16,7 @@ nom = "2.0.1"
 quick-error = "1.1.0"
 
 [dev-dependencies]
-bart = { version = "0.1.0", path = "../bart" }
+bart = { version = "0.0.1", path = "../bart" }
 
 [lib]
 proc-macro = true
