@@ -1,3 +1,4 @@
+use nom::*;
 use std::fmt::{self, Display, Write};
 
 struct EscapingWriter<'a> {
@@ -10,21 +11,22 @@ impl<'a> EscapingWriter<'a> {
     }
 }
 
+named!(part(&str) -> &str,
+    alt!(
+        map!(tag!("<"), |_| "&lt;" ) |
+        map!(tag!("&"), |_| "&amp;" ) |
+        map!(tag!("\""), |_| "&quot;" ) |
+        map!(tag!("'"), |_| "&apos;" ) |
+        is_not!("<&\"'")
+    )
+);
+
 impl<'a> Write for EscapingWriter<'a> {
     fn write_str(&mut self, buf: &str) -> fmt::Result {
-        // Sneaky use of String::split, capturing the separator:
-
-        let mut separator = '_';
-        for part in buf.split(|x| { separator = x; (x == '<') || (x == '&') || (x == '\'') || (x == '"') }) {
-            self.inner.write_str(part)?;
-
-            match separator {
-                '<' => self.inner.write_str("&lt;"),
-                '&' => self.inner.write_str("&amp;"),
-                '\'' => self.inner.write_str("&apos;"),
-                '"' => self.inner.write_str("&quot;"),
-                _ => Ok(()),
-            }?;
+        let mut rest = buf;
+        while let IResult::Done(new_rest, parsed) = part(&rest) {
+            self.inner.write_str(parsed)?;
+            rest = new_rest;
         }
 
         Ok(())
@@ -90,16 +92,16 @@ mod test {
     #[test]
     fn it_works() {
         assert_eq!(
-            " &lt; &amp; &quot; &apos; ",
-            format!("{}", Fake { text: " < & \" ' " })
+            " &lt; &amp; text &quot; &apos; ",
+            format!("{}", Fake { text: " < & text \" ' " })
         );
     }
 
     #[test]
     fn it_handles_tight_packed_string() {
         assert_eq!(
-            "&lt;&amp;&quot;&apos;",
-            format!("{}", Fake { text: "<&\"'" })
+            "&lt;te&amp;&quot;xt&apos;",
+            format!("{}", Fake { text: "<te&\"xt'" })
         );
     }
 }
