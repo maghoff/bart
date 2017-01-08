@@ -44,7 +44,7 @@ Use `bart_derive` to generate an `impl` of the `Display` trait based on the temp
 
     #[template = "hello_world.html"]
 
-`bart_derive` will read `hello_world.html` and use it to generate the template rendering code. The given file name is relative to your crate root.
+`bart_derive` will read `hello_world.html` and use it to generate the template rendering code. The given file name is relative to your crate root, so, for example, you have to specify `#[template = "src/hello_world.html"]` if you want your template to reside in the `src/` directory.
 
 It is also possible to specify the template inline with `template_string`: `#[template_string = "Hello {{name}}"]`.
 
