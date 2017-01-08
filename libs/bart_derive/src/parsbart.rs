@@ -25,6 +25,24 @@ struct CloseScopeTag {
     pub name: Name,
 }
 
+fn identifier(input: &str) -> IResult<&str, &str> {
+  let input_length = input.input_len();
+  if input_length == 0 {
+    return IResult::Incomplete(Needed::Unknown);
+  }
+
+  for (idx, item) in input.iter_indices() {
+    if !(item.is_alphanum() || item == '_') {
+      if idx == 0 {
+        return IResult::Error(error_position!(ErrorKind::AlphaNumeric, input))
+      } else {
+        return IResult::Done(input.slice(idx..), input.slice(0..idx))
+      }
+    }
+  }
+  IResult::Done(input.slice(input_length..), input)
+}
+
 named!(name(&str) -> Name,
     chain!(
         dots: many0!(tag!(".")) ~
@@ -32,11 +50,11 @@ named!(name(&str) -> Name,
             opt!(
                 recognize!(
                     pair!(
-                        alphanumeric,
+                        identifier,
                         many0!(
                             pair!(
                                 tag!("."),
-                                alphanumeric
+                                identifier
                             )
                         )
                     )
@@ -203,6 +221,20 @@ mod test {
                 Sequence(vec![
                     Literal("Hello ".to_owned()),
                     Interpolation(Name { dots: 0, name: Some("name".to_owned()) })
+                ]),
+                Literal("!".to_owned())
+            ])
+        );
+    }
+
+    #[test]
+    fn it_accepts_underscore_in_identifiers() {
+        assert_eq!(
+            parse_str("Hello {{your_name}}!").unwrap(),
+            Sequence(vec![
+                Sequence(vec![
+                    Literal("Hello ".to_owned()),
+                    Interpolation(Name { dots: 0, name: Some("your_name".to_owned()) })
                 ]),
                 Literal("!".to_owned())
             ])
