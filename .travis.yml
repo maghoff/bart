@@ -1,6 +1,6 @@
 language: rust
 rust:
-  - nightly
+  - beta
 env:
   - CRATE=libs/bart
   - CRATE=libs/bart_derive
