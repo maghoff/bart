@@ -40,7 +40,7 @@ The programmer interface to Bart is the procedural macro defined in the `bart_de
 
     #[derive(BartDisplay)]
 
-Use `bart_derive` to generate an `impl` of the `Display` trait based on the template and struct below.
+Use `bart_derive` to generate an `impl` of the [`Display`][Display] trait based on the template and struct below.
 
     #[template = "hello_world.html"]
 
@@ -52,13 +52,13 @@ It is also possible to specify the template inline with `template_string`: `#[te
         name: &'a str,
     }
 
-Values to be interpolated in the template will be resolved from the given `struct`. In this case `{{name}}` would be resolved to the `name` field of this struct. Fields to be interpolated must implement the `Display` trait.
+Values to be interpolated in the template will be resolved from the given `struct`. In this case `{{name}}` would be resolved to the `name` field of this struct. Fields to be interpolated must implement the [`Display`][Display] trait.
 
     fn main() {
         print!("{}", &HelloWorld { name: "World" });
     }
 
-As noted above, `bart_derive` has now generated an `impl` of `Display` for `HelloWorld`. This means we can pass instances of `HelloWorld` to `print!`, `write!`, `format!` and so on. The template is rendered with the supplied data, generating `Hello World` to standard output.
+As noted above, `bart_derive` has now generated an `impl` of [`Display`][Display] for `HelloWorld`. This means we can pass instances of `HelloWorld` to `print!`, `write!`, `format!` and so on. The template is rendered with the supplied data, generating `Hello World` to standard output.
 
 Language reference
 ==================
@@ -68,7 +68,7 @@ The input is reproduced verbatim except for tags. Tags start with `{{` and end w
 
 Interpolation
 -------------
-The simplest tag is the interpolation tag, which contains a data reference. For the template `Hello {{name}}`, `{{name}}` is recognized as an interpolation tag and `name` is resolved as a field on the given `struct`. This field must implement the `Display` trait. It is possible to use `.` to refer to fields in nested `struct`s; `{{name.surname}}`.
+The simplest tag is the interpolation tag, which contains a data reference. For the template `Hello {{name}}`, `{{name}}` is recognized as an interpolation tag and `name` is resolved as a field on the given `struct`. This field must implement the [`Display`][Display] trait. It is possible to use `.` to refer to fields in nested `struct`s; `{{name.surname}}`.
 
 Interpolation tags are HTML escaped, so for the template `Hello {{name}}`, if `{{name}}` is `Bobby <tags>`, the output will be `Hello Bobby &lt;tags>`.
 
@@ -119,3 +119,6 @@ When in a nested scope, use multiple leading dots to step out:
 Unqualified names, that is, names without leading dots, will always be resolved in the topmost scope.
 
 The same scoping rules applies to iteration scopes.
+
+
+[Display]: https://doc.rust-lang.org/std/fmt/trait.Display.html
