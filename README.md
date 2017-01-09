@@ -2,7 +2,7 @@
 
 Bart is a compile time templating language inspired by Mustache.
 
-**NOTE** that Bart currently requires the nightly build of Rust to work. It uses procedural macros, which are expected to become available in Rust stable 1.15, to be released February 2. In the mean time, use `rustup override set nightly`.
+**NOTE** that Bart currently requires the nightly build of Rust to work. It uses procedural macros, which are expected to become available in Rust stable 1.15, to be released February 2. In the meantime, use `rustup override set nightly`.
 
 Example
 =======
