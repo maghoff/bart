@@ -37,7 +37,7 @@ fn generate(node: Ast, scope_level: usize) -> quote::Tokens {
             let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
             let nested_generated = generate(*nested, scope_level + 1);
             quote! {
-                for ref #scope_variable in &#name {
+                for ref #scope_variable in (&#name).into_iter() {
                     #nested_generated
                 }
             }

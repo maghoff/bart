@@ -78,6 +78,18 @@ fn it_can_iterate_option() {
 }
 
 #[test]
+fn it_can_iterate_borrowed_slice() {
+    #[derive(BartDisplay)]
+    #[template_string="{{#slice}}{{.}}{{/slice}}"]
+    struct Test<'a> { slice: &'a [i32] }
+
+    assert_eq!(
+        "123",
+        format!("{}", Test { slice: &[1, 2, 3] })
+    );
+}
+
+#[test]
 fn it_can_access_nested_fields() {
     struct Nested { a: i32 }
 
