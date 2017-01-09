@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/maghoff/bart.svg?branch=master)](https://travis-ci.org/maghoff/bart)
 
-Bart is a compile time templating language inspired by Mustache.
+Bart is a compile time templating language for [Rust](https://www.rust-lang.org/en-US/) inspired by [Mustache](https://mustache.github.io/mustache.5.html). It plays to Rust's strengths by statically compiling the template into efficient code and performing full variable resolution and type checking at compile time.
 
 **NOTE** that Bart currently requires the nightly build of Rust to work. It uses procedural macros, which are expected to become available in Rust stable 1.15, to be released February 2. In the meantime, use `rustup override set nightly`.
 
@@ -52,7 +52,7 @@ It is also possible to specify the template inline with `template_string`: `#[te
         name: &'a str,
     }
 
-Values to be interpolated in the template will be resolved from the given `struct`. In this case `{{name}}` would be resolved to the `name` of this struct. Fields to be interpolated must implement the `Display` trait.
+Values to be interpolated in the template will be resolved from the given `struct`. In this case `{{name}}` would be resolved to the `name` field of this struct. Fields to be interpolated must implement the `Display` trait.
 
     fn main() {
         print!("{}", &HelloWorld { name: "World" });
@@ -78,7 +78,7 @@ It is also useful to be able to deliberately include HTML content unescaped. Use
 
 Iteration
 ---------
-It is possible to iterate over anything that implements `IntoIter`:
+It is possible to iterate over anything that implements [`IntoIterator`](https://doc.rust-lang.org/std/iter/trait.IntoIterator.html):
 
     <ul>
     {{#values}}
@@ -94,7 +94,7 @@ Use `{{.}}` to refer to the current value. For example, if `values` were a `Vec<
     {{/people}}
     </ul>
 
-It can be useful to take advantage of the `IntoIter` implementations on `Option` and `Result` to use them in Bart iterations.
+It can be useful to take advantage of the `IntoIterator` implementations on `Option` and `Result` to use them in Bart iterations.
 
 Scoping
 -------
@@ -115,5 +115,7 @@ When in a nested scope, use multiple leading dots to step out:
             {{.name}}, head of the {{..name}} department.
         {{/head}}
     {{/department}}
+
+Unqualified names, that is, names without leading dots, will always be resolved in the topmost scope.
 
 The same scoping rules applies to iteration scopes.
