@@ -1,0 +1,11 @@
+language: rust
+rust:
+  - nightly
+env:
+  - CRATE=libs/bart
+  - CRATE=libs/bart_derive
+  - CRATE=.
+script:
+  - cd "$CRATE"
+  - cargo build --verbose
+  - cargo test --verbose
