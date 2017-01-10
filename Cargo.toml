@@ -1,8 +1,23 @@
-[project]
-name = "bart-examples"
-version = "0.0.0"
-publish = false
+[package]
+authors = ["Magnus Hoff <maghoff@gmail.com>"]
+description = "A compile time templating language inspired by Mustache"
+documentation = "https://docs.rs/bart/0.0.1/bart/"
+keywords = ["web", "templating"]
+license = "MIT"
+name = "bart"
+repository = "https://github.com/maghoff/bart"
+version = "0.0.1"
+readme = "README.md"
+
+[dependencies]
+nom = "2.0.1"
 
 [dev-dependencies]
-bart = { path = "libs/bart" }
-bart_derive = { path = "libs/bart_derive" }
+
+[dev-dependencies.bart_derive]
+path = "libs/bart_derive"
+version = "0.0.1"
+
+[features]
+default = []
+specialization = []

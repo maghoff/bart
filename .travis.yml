@@ -2,7 +2,6 @@ language: rust
 rust:
   - beta
 env:
-  - CRATE=libs/bart
   - CRATE=libs/bart_derive
   - CRATE=.
 script:
