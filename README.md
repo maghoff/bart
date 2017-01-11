@@ -118,7 +118,7 @@ When in a nested scope, use multiple leading dots to step out:
 
 Unqualified names, that is, names without leading dots, will always be resolved in the topmost scope.
 
-The same scoping rules applies to iteration scopes.
+The same scoping rules apply to iteration scopes.
 
 
 [Display]: https://doc.rust-lang.org/std/fmt/trait.Display.html
