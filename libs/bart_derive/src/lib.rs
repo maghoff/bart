@@ -47,7 +47,7 @@ fn generate(node: Ast, scope_level: usize) -> quote::Tokens {
             let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
             let nested_generated = generate(*nested, scope_level + 1);
             quote! {
-                if Into::into(#name) {
+                if _bart::Conditional::val(&#name) {
                     let ref #scope_variable = #name;
                     #nested_generated
                 }
@@ -58,7 +58,7 @@ fn generate(node: Ast, scope_level: usize) -> quote::Tokens {
             let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
             let nested_generated = generate(*nested, scope_level + 1);
             quote! {
-                if Into::<bool>::into(#name) == false {
+                if !_bart::Conditional::val(&#name) {
                     let ref #scope_variable = #name;
                     #nested_generated
                 }

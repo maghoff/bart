@@ -118,7 +118,7 @@ fn it_can_scope_into_nested_values() {
 }
 
 #[test]
-fn it_supports_boolean_scope() {
+fn it_supports_conditional_scope_with_boolean() {
     #[derive(BartDisplay)]
     #[template_string="{{#a?}}yes{{/a}}"]
     struct Test { a: bool }
@@ -131,5 +131,34 @@ fn it_supports_boolean_scope() {
     assert_eq!(
         "",
         format!("{}", Test { a: false })
+    );
+}
+
+#[test]
+fn it_supports_conditional_scope_with_non_bool() {
+    extern crate bart;
+
+    struct TestBool<'a> {
+        name: &'a str,
+    }
+
+    impl<'a> bart::Conditional for TestBool<'a> {
+        fn val(&self) -> bool {
+            self.name.len() > 2
+        }
+    }
+
+    #[derive(BartDisplay)]
+    #[template_string="{{cond.name}}: {{#cond?}}Hello {{.name}}{{/cond}}"]
+    struct Test<'a> { cond: TestBool<'a> }
+
+    assert_eq!(
+        "Joe: Hello Joe",
+        format!("{}", Test { cond: TestBool { name: "Joe" } })
+    );
+
+    assert_eq!(
+        "No: ",
+        format!("{}", Test { cond: TestBool { name: "No" } })
     );
 }
