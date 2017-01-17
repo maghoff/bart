@@ -4,6 +4,14 @@ Bart is a compile time templating language for [Rust](https://www.rust-lang.org/
 
 _NOTE_ that Bart currently requires the beta (or nightly) build of Rust to work. It uses procedural macros, which are expected to become available in Rust stable 1.15, to be released February 3. In the meantime, use `rustup override set beta`.
 
+Cargo dependencies
+==================
+To use Bart, add these dependencies to your `Cargo.toml`:
+
+    [dependencies]
+    bart = "0.1.0"
+    bart_derive = "0.1.0"
+
 Example
 =======
 Given the template file `hello_world.html`:
