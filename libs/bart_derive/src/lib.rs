@@ -100,15 +100,31 @@ fn buf_file(filename: &str) -> String {
 
 #[proc_macro_derive(BartDisplay, attributes(template, template_string))]
 pub fn bart_display(input: TokenStream) -> TokenStream {
+    use std::env;
+    use std::path::PathBuf;
+
     let s = input.to_string();
     let ast = syn::parse_macro_input(&s).unwrap();
 
+    let user_crate_root = PathBuf::from(
+        env::var("CARGO_MANIFEST_DIR")
+            .expect("CARGO_MANIFEST_DIR must be set to the root path of the crate")
+    );
+
+    let mut dependencies = Vec::<String>::new();
+
+    let filename_opt = find_attr(&ast.attrs, "template");
+
     let template =
-        find_attr(&ast.attrs, "template").map(buf_file)
+        filename_opt.map(buf_file)
             .or_else(||
                 find_attr(&ast.attrs, "template_string").map(|x| x.to_owned())
             )
         .expect("#[derive(BartDisplay)] requires #[template = \"(filename)\"] or  #[template_string = \"...\"]");
+
+    if let Some(filename) = filename_opt {
+        dependencies.push(user_crate_root.join(filename).to_str().unwrap().to_owned());
+    }
 
     let parsed = parsbart::parse_str(&template).unwrap();
     let generated = generate(parsed, 1);
@@ -126,6 +142,10 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
             #[automatically_derived]
             impl #impl_generics ::std::fmt::Display for #name #ty_generics #where_clause {
                 fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                    #(
+                        let _ = include_bytes!(#dependencies);
+                    )*
+
                     let ref _s0 = self;
 
                     #generated
