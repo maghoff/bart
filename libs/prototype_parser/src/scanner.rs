@@ -14,14 +14,14 @@ pub enum Token<'a> {
     SectionCloser(&'a str),
 }
 
-pub fn consume<'a>(input: &'a str, expected: &str) -> Result<&'a str, Error> {
+fn consume<'a>(input: &'a str, expected: &str) -> Result<&'a str, Error> {
     match input.starts_with(expected) {
         true => Ok(&input[expected.len()..]),
         false => Err(Error::Mismatch),
     }
 }
 
-pub fn bart_tag<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
+fn bart_tag<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
     let input = consume(input, TAG_OPENER)?;
 
     enum TagType { // TODO Refactor into functions instead?
@@ -51,7 +51,7 @@ pub fn bart_tag<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
     }))
 }
 
-pub fn literal_text<'a>(input: &'a str) -> Result<(&'a str, Option<Token<'a>>), Error> {
+fn literal_text<'a>(input: &'a str) -> Result<(&'a str, Option<Token<'a>>), Error> {
     match input.find(TAG_OPENER) {
         Some(0) => Ok((input, None)),
         Some(index) => Ok((
