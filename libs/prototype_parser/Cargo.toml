@@ -1,0 +1,7 @@
+[package]
+authors = ["Magnus Hoff <maghoff@gmail.com>"]
+name = "prototype_parser"
+version = "0.1.0"
+
+[dependencies]
+nom = "2.0.1"
