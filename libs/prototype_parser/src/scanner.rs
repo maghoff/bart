@@ -1,7 +1,10 @@
 extern crate syn;
 
+use token::Token;
+
 const TAG_OPENER: &'static str = "{{";
 const TAG_CLOSER: &'static str = "}}";
+const UNESCAPED_TAG_CLOSER: &'static str = "}}}";
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
@@ -11,14 +14,6 @@ pub enum Error {
 #[derive(Debug, PartialEq, Eq)]
 pub struct Name<'a> {
     name: &'a str,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub enum Token<'a> {
-    Literal(&'a str),
-    Interpolation(&'a str),
-    SectionOpener(&'a str),
-    SectionCloser(&'a str),
 }
 
 fn consume<'a>(input: &'a str, expected: &str) -> Result<&'a str, Error> {
@@ -47,6 +42,13 @@ fn interpolation<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     Ok(Token::Interpolation(name.name))
 }
 
+fn unescaped_interpolation<'a>(input: &'a str) -> Result<Token<'a>, Error> {
+    let input = consume(input, "{")?;
+    let (rest, name) = name(input)?;
+    at_end(rest)?;
+    Ok(Token::UnescapedInterpolation(name.name))
+}
+
 fn section_opener<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     let input = consume(input, "#")?;
     let (rest, name) = name(input)?;
@@ -64,13 +66,20 @@ fn section_closer<'a>(input: &'a str) -> Result<Token<'a>, Error> {
 fn bart_tag<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
     let input = consume(input, TAG_OPENER)?;
 
-    let end = input.find(TAG_CLOSER).ok_or(Error::Mismatch)?;
-    let tag_meat = &input[..end];
-    let rest = &input[end + TAG_CLOSER.len()..];
+    let peek = input.chars().next();
+    let tag_closer = match peek {
+        Some('{') => UNESCAPED_TAG_CLOSER,
+        _ => TAG_CLOSER,
+    };
 
-    let tag = match tag_meat.chars().next() {
+    let end = input.find(tag_closer).ok_or(Error::Mismatch)?;
+    let tag_meat = &input[..end];
+    let rest = &input[end + tag_closer.len()..];
+
+    let tag = match peek {
         Some('#') => section_opener(tag_meat)?,
         Some('/') => section_closer(tag_meat)?,
+        Some('{') => unescaped_interpolation(tag_meat)?,
         Some(_) => interpolation(tag_meat)?,
         None => return Err(Error::Mismatch),
     };
@@ -170,6 +179,14 @@ mod tests {
         assert_eq!(
             Ok(("", Token::SectionCloser("ape"))),
             bart_tag("{{/ape}}")
+        );
+    }
+
+    #[test]
+    fn bart_tag_matches_unescaped_interpolation() {
+        assert_eq!(
+            Ok(("", Token::UnescapedInterpolation("ape"))),
+            bart_tag("{{{ape}}}")
         );
     }
 

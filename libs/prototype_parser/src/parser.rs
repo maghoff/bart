@@ -7,24 +7,6 @@ pub enum Error<'a> {
     Mismatch { expected: &'static str, found: Option<Token<'a>> }
 }
 
-fn literal<'a, T>(token_stream: &mut Peekable<T>) -> Result<Ast<'a>, Error<'a>>
-    where T: Iterator<Item=Token<'a>>
-{
-    match token_stream.next() {
-        Some(Token::Literal(literal)) => Ok(Ast::Literal(literal)),
-        x => Err(Error::Mismatch { expected: "literal", found: x })
-    }
-}
-
-fn interpolation<'a, T>(token_stream: &mut Peekable<T>) -> Result<Ast<'a>, Error<'a>>
-    where T: Iterator<Item=Token<'a>>
-{
-    match token_stream.next() {
-        Some(Token::Interpolation(name)) => Ok(Ast::Interpolation(name)),
-        x => Err(Error::Mismatch { expected: "interpolation", found: x })
-    }
-}
-
 fn section<'a, T>(token_stream: &mut Peekable<T>) -> Result<Ast<'a>, Error<'a>>
     where T: Iterator<Item=Token<'a>>
 {
@@ -52,11 +34,12 @@ fn sequence<'a, T>(token_stream: &mut Peekable<T>) -> Result<Ast<'a>, Error<'a>>
     loop {
         seq.push(
             match token_stream.peek() {
-                Some(&Token::Literal(_)) => literal(token_stream),
-                Some(&Token::Interpolation(_)) => interpolation(token_stream),
-                Some(&Token::SectionOpener(_)) => section(token_stream),
+                Some(&Token::Literal(text)) => { token_stream.next(); Ast::Literal(text) },
+                Some(&Token::Interpolation(name)) => { token_stream.next(); Ast::Interpolation(name) },
+                Some(&Token::UnescapedInterpolation(name)) => { token_stream.next(); Ast::UnescapedInterpolation(name) },
+                Some(&Token::SectionOpener(_)) => section(token_stream)?,
                 _ => break
-            }?
+            }
         )
     }
 
@@ -131,5 +114,21 @@ mod test {
         ]);
 
         assert!(res.is_err())
+    }
+
+    #[test]
+    fn understands_unescaped_interpolation() {
+        assert_eq!(
+            Ast::Sequence(vec![
+                Ast::Literal("a"),
+                Ast::UnescapedInterpolation("b"),
+                Ast::Literal("c"),
+            ]),
+            parse(vec![
+                Token::Literal("a"),
+                Token::UnescapedInterpolation("b"),
+                Token::Literal("c"),
+            ]).unwrap()
+        )
     }
 }
