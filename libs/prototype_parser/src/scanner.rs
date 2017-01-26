@@ -29,48 +29,53 @@ fn consume<'a>(input: &'a str, expected: &str) -> Result<&'a str, Error> {
 }
 
 fn name<'a>(input: &'a str) -> Result<(&'a str, Name<'a>), Error> {
-    let end_opt = input.find(TAG_CLOSER);
-    // TODO Consider other terminators, like punctuation and whitespace
-
-    let end = end_opt.ok_or(Error::Mismatch)?;
-
-    let name = &input[0..end];
-
+    let name = input;
     syn::parse_ident(name).map_err(|_| Error::Mismatch)?;
-
-    Ok((&input[end..], Name { name: name }))
+    Ok((&input[0..0], Name { name: name }))
 }
 
-fn interpolation<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
+fn at_end(input: &str) -> Result<(), Error> {
+    match input.len() {
+        0 => Ok(()),
+        _ => Err(Error::Mismatch),
+    }
+}
+
+fn interpolation<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     let (rest, name) = name(input)?;
-    Ok((rest, Token::Interpolation(name.name)))
+    at_end(rest)?;
+    Ok(Token::Interpolation(name.name))
 }
 
-fn section_opener<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
+fn section_opener<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     let input = consume(input, "#")?;
     let (rest, name) = name(input)?;
-    Ok((rest, Token::SectionOpener(name.name)))
+    at_end(rest)?;
+    Ok(Token::SectionOpener(name.name))
 }
 
-fn section_closer<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
+fn section_closer<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     let input = consume(input, "/")?;
     let (rest, name) = name(input)?;
-    Ok((rest, Token::SectionCloser(name.name)))
+    at_end(rest)?;
+    Ok(Token::SectionCloser(name.name))
 }
 
 fn bart_tag<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
     let input = consume(input, TAG_OPENER)?;
 
-    let (input, tag) = match input.chars().next() {
-        Some('#') => section_opener(input)?,
-        Some('/') => section_closer(input)?,
-        Some(_) => interpolation(input)?,
+    let end = input.find(TAG_CLOSER).ok_or(Error::Mismatch)?;
+    let tag_meat = &input[..end];
+    let rest = &input[end + TAG_CLOSER.len()..];
+
+    let tag = match tag_meat.chars().next() {
+        Some('#') => section_opener(tag_meat)?,
+        Some('/') => section_closer(tag_meat)?,
+        Some(_) => interpolation(tag_meat)?,
         None => return Err(Error::Mismatch),
     };
 
-    let input = consume(input, TAG_CLOSER)?;
-
-    Ok((input, tag))
+    Ok((rest, tag))
 }
 
 fn literal_text<'a>(input: &'a str) -> Result<(&'a str, Option<Token<'a>>), Error> {
