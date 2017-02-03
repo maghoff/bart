@@ -35,8 +35,18 @@ fn sequence<'a, T>(token_stream: &mut Peekable<T>) -> Result<Ast<'a>, Error<'a>>
         seq.push(
             match token_stream.peek() {
                 Some(&Token::Literal(text)) => { token_stream.next(); Ast::Literal(text) },
-                Some(&Token::Interpolation(name)) => { token_stream.next(); Ast::Interpolation(name) },
-                Some(&Token::UnescapedInterpolation(name)) => { token_stream.next(); Ast::UnescapedInterpolation(name) },
+                Some(&Token::Interpolation(_)) => {
+                    match token_stream.next() {
+                        Some(Token::Interpolation(name)) => Ast::Interpolation(name),
+                        _ => panic!("Outer match should guarantee match in inner match"),
+                    }
+                },
+                Some(&Token::UnescapedInterpolation(_)) => {
+                    match token_stream.next() {
+                        Some(Token::UnescapedInterpolation(name)) => Ast::UnescapedInterpolation(name),
+                        _ => panic!("Outer match should guarantee match in inner match"),
+                    }
+                },
                 Some(&Token::SectionOpener(_)) => section(token_stream)?,
                 _ => break
             }
@@ -70,6 +80,7 @@ pub fn parse<'a, T>(token_stream: T) -> Result<Ast<'a>, Error<'a>>
 #[cfg(test)]
 mod test {
     use super::*;
+    use token::*;
 
     #[test]
     fn it_works() {
@@ -89,7 +100,7 @@ mod test {
             Ast::Sequence(vec![
                 Ast::Literal("text a"),
                 Ast::Section {
-                    name: "x",
+                    name: simple_name("x"),
                     nested: Box::new(Ast::Sequence(vec![
                         Ast::Literal("text b"),
                     ]))
@@ -98,9 +109,9 @@ mod test {
             ]),
             parse(vec![
                 Token::Literal("text a"),
-                Token::SectionOpener("x"),
+                Token::SectionOpener(simple_name("x")),
                 Token::Literal("text b"),
-                Token::SectionCloser("x"),
+                Token::SectionCloser(simple_name("x")),
                 Token::Literal("text c"),
             ]).unwrap()
         )
@@ -109,8 +120,8 @@ mod test {
     #[test]
     fn section_closer_mismatch() {
         let res = parse(vec![
-            Token::SectionOpener("x"),
-            Token::SectionCloser("y"),
+            Token::SectionOpener(simple_name("x")),
+            Token::SectionCloser(simple_name("y")),
         ]);
 
         assert!(res.is_err())
@@ -121,12 +132,12 @@ mod test {
         assert_eq!(
             Ast::Sequence(vec![
                 Ast::Literal("a"),
-                Ast::UnescapedInterpolation("b"),
+                Ast::UnescapedInterpolation(simple_name("b")),
                 Ast::Literal("c"),
             ]),
             parse(vec![
                 Token::Literal("a"),
-                Token::UnescapedInterpolation("b"),
+                Token::UnescapedInterpolation(simple_name("b")),
                 Token::Literal("c"),
             ]).unwrap()
         )

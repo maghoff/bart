@@ -1,9 +1,7 @@
-#[macro_use] extern crate nom;
-
 mod ast;
-mod token;
-mod scanner;
 mod parser;
+mod scanner;
+mod token;
 
 pub use scanner::sequence;
 pub use parser::parse;

@@ -1,6 +1,7 @@
+extern crate num;
 extern crate syn;
 
-use token::Token;
+use token::*;
 
 const TAG_OPENER: &'static str = "{{";
 const TAG_CLOSER: &'static str = "}}";
@@ -11,11 +12,6 @@ pub enum Error {
     Mismatch
 }
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct Name<'a> {
-    name: &'a str,
-}
-
 fn consume<'a>(input: &'a str, expected: &str) -> Result<&'a str, Error> {
     match input.starts_with(expected) {
         true => Ok(&input[expected.len()..]),
@@ -23,10 +19,24 @@ fn consume<'a>(input: &'a str, expected: &str) -> Result<&'a str, Error> {
     }
 }
 
+fn not_dot(ch: char) -> bool {
+    ch != '.'
+}
+
 fn name<'a>(input: &'a str) -> Result<(&'a str, Name<'a>), Error> {
-    let name = input;
-    syn::parse_ident(name).map_err(|_| Error::Mismatch)?;
-    Ok((&input[0..0], Name { name: name }))
+    let leading_dots = input.find(not_dot).ok_or(Error::Mismatch)?;
+    let input = &input[leading_dots..];
+
+    let mut segments = vec![];
+    for segment in input.split('.') {
+        syn::parse_ident(segment).map_err(|_| Error::Mismatch)?;
+        segments.push(segment);
+    }
+
+    Ok((&input[0..0], Name {
+        leading_dots: num::cast::cast(leading_dots).unwrap(),
+        segments: segments,
+    }))
 }
 
 fn at_end(input: &str) -> Result<(), Error> {
@@ -39,28 +49,28 @@ fn at_end(input: &str) -> Result<(), Error> {
 fn interpolation<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     let (rest, name) = name(input)?;
     at_end(rest)?;
-    Ok(Token::Interpolation(name.name))
+    Ok(Token::Interpolation(name))
 }
 
 fn unescaped_interpolation<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     let input = consume(input, "{")?;
     let (rest, name) = name(input)?;
     at_end(rest)?;
-    Ok(Token::UnescapedInterpolation(name.name))
+    Ok(Token::UnescapedInterpolation(name))
 }
 
 fn section_opener<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     let input = consume(input, "#")?;
     let (rest, name) = name(input)?;
     at_end(rest)?;
-    Ok(Token::SectionOpener(name.name))
+    Ok(Token::SectionOpener(name))
 }
 
 fn section_closer<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     let input = consume(input, "/")?;
     let (rest, name) = name(input)?;
     at_end(rest)?;
-    Ok(Token::SectionCloser(name.name))
+    Ok(Token::SectionCloser(name))
 }
 
 fn bart_tag<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
@@ -145,8 +155,16 @@ mod tests {
     #[test]
     fn bart_tag_matches() {
         assert_eq!(
-            Ok(("tail", Token::Interpolation("ape"))),
+            Ok(("tail", Token::Interpolation(simple_name("ape")))),
             bart_tag("{{ape}}tail")
+        );
+    }
+
+    #[test]
+    fn bart_tag_matches_name_with_underscore() {
+        assert_eq!(
+            Ok(("tail", Token::Interpolation(simple_name("ape_katt")))),
+            bart_tag("{{ape_katt}}tail")
         );
     }
 
@@ -169,7 +187,7 @@ mod tests {
     #[test]
     fn bart_tag_matches_section_opener() {
         assert_eq!(
-            Ok(("", Token::SectionOpener("ape"))),
+            Ok(("", Token::SectionOpener(simple_name("ape")))),
             bart_tag("{{#ape}}")
         );
     }
@@ -177,7 +195,7 @@ mod tests {
     #[test]
     fn bart_tag_matches_section_closer() {
         assert_eq!(
-            Ok(("", Token::SectionCloser("ape"))),
+            Ok(("", Token::SectionCloser(simple_name("ape")))),
             bart_tag("{{/ape}}")
         );
     }
@@ -185,7 +203,7 @@ mod tests {
     #[test]
     fn bart_tag_matches_unescaped_interpolation() {
         assert_eq!(
-            Ok(("", Token::UnescapedInterpolation("ape"))),
+            Ok(("", Token::UnescapedInterpolation(simple_name("ape")))),
             bart_tag("{{{ape}}}")
         );
     }
@@ -232,9 +250,9 @@ mod tests {
     fn template_with_tightly_packed_tags() {
         let parsed = sequence("{{a}}{{b}}{{c}}").unwrap();
         assert_eq!(vec![
-            Interpolation("a".into()),
-            Interpolation("b".into()),
-            Interpolation("c".into()),
+            Interpolation(simple_name("a")),
+            Interpolation(simple_name("b")),
+            Interpolation(simple_name("c")),
         ], parsed);
     }
 
@@ -243,11 +261,30 @@ mod tests {
         let parsed = sequence("Hello {{name}}! {{#list}}Welcome{{/list}}").unwrap();
         assert_eq!(vec![
             Literal("Hello "),
-            Interpolation("name"),
+            Interpolation(simple_name("name")),
             Literal("! "),
-            SectionOpener("list"),
+            SectionOpener(simple_name("list")),
             Literal("Welcome"),
-            SectionCloser("list"),
+            SectionCloser(simple_name("list")),
+        ], parsed);
+    }
+
+    #[test]
+    fn tags_with_leading_dots() {
+        let parsed = sequence("{{.a}}{{..b}}{{...c}}").unwrap();
+        assert_eq!(vec![
+            Interpolation(Name { leading_dots: 1, segments: vec!["a"] }),
+            Interpolation(Name { leading_dots: 2, segments: vec!["b"] }),
+            Interpolation(Name { leading_dots: 3, segments: vec!["c"] }),
+        ], parsed);
+    }
+
+    #[test]
+    fn tags_with_segmented_names() {
+        let parsed = sequence("{{a.b.c}}{{..b.c.d}}").unwrap();
+        assert_eq!(vec![
+            Interpolation(Name { leading_dots: 0, segments: vec!["a", "b", "c"] }),
+            Interpolation(Name { leading_dots: 2, segments: vec!["b", "c", "d"] }),
         ], parsed);
     }
 }

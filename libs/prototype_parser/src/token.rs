@@ -1,8 +1,22 @@
 #[derive(Debug, PartialEq, Eq)]
+pub struct Name<'a> {
+    pub leading_dots: u32,
+    pub segments: Vec<&'a str>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub enum Token<'a> {
     Literal(&'a str),
-    Interpolation(&'a str),
-    UnescapedInterpolation(&'a str),
-    SectionOpener(&'a str),
-    SectionCloser(&'a str),
+    Interpolation(Name<'a>),
+    UnescapedInterpolation(Name<'a>),
+    SectionOpener(Name<'a>),
+    SectionCloser(Name<'a>),
+}
+
+#[cfg(test)]
+pub fn simple_name(name: &'static str) -> Name<'static> {
+    Name {
+        leading_dots: 0,
+        segments: vec![name],
+    }
 }

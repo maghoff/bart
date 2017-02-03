@@ -4,5 +4,5 @@ name = "prototype_parser"
 version = "0.1.0"
 
 [dependencies]
-nom = "2.0.1"
+num = "0.1.36"
 syn = "0.11.0"
