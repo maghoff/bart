@@ -24,11 +24,16 @@ fn section<'a, T>(token_stream: &mut Peekable<T>) -> Result<Ast<'a>, Error<'a>>
     }?;
 
     Ok(match section_type {
-        SectionType::Iteration => Ast::Iteration { name: name, nested: nested },
-        SectionType::NegativeIteration => unimplemented!(),
-        SectionType::Conditional => unimplemented!(),
-        SectionType::NegativeConditional => unimplemented!(),
-        SectionType::Scope => unimplemented!(),
+        SectionType::Iteration =>
+            Ast::Iteration { name: name, nested: nested },
+        SectionType::NegativeIteration =>
+            Ast::NegativeIteration { name: name, nested: nested },
+        SectionType::Conditional =>
+            Ast::Conditional { name: name, nested: nested },
+        SectionType::NegativeConditional =>
+            Ast::NegativeConditional { name: name, nested: nested },
+        SectionType::Scope =>
+            Ast::Scope { name: name, nested: nested },
     })
 }
 
@@ -100,7 +105,7 @@ mod test {
     }
 
     #[test]
-    fn simple_iteration_section() {
+    fn simple_iteration() {
         assert_eq!(
             Ast::Sequence(vec![
                 Ast::Literal("text a"),
@@ -115,6 +120,98 @@ mod test {
             parse(vec![
                 Token::Literal("text a"),
                 Token::SectionOpener(SectionType::Iteration, simple_name("x")),
+                Token::Literal("text b"),
+                Token::SectionCloser(simple_name("x")),
+                Token::Literal("text c"),
+            ]).unwrap()
+        )
+    }
+
+    #[test]
+    fn simple_negative_iteration() {
+        assert_eq!(
+            Ast::Sequence(vec![
+                Ast::Literal("text a"),
+                Ast::NegativeIteration {
+                    name: simple_name("x"),
+                    nested: Box::new(Ast::Sequence(vec![
+                        Ast::Literal("text b"),
+                    ]))
+                },
+                Ast::Literal("text c"),
+            ]),
+            parse(vec![
+                Token::Literal("text a"),
+                Token::SectionOpener(SectionType::NegativeIteration, simple_name("x")),
+                Token::Literal("text b"),
+                Token::SectionCloser(simple_name("x")),
+                Token::Literal("text c"),
+            ]).unwrap()
+        )
+    }
+
+    #[test]
+    fn simple_conditional() {
+        assert_eq!(
+            Ast::Sequence(vec![
+                Ast::Literal("text a"),
+                Ast::Conditional {
+                    name: simple_name("x"),
+                    nested: Box::new(Ast::Sequence(vec![
+                        Ast::Literal("text b"),
+                    ]))
+                },
+                Ast::Literal("text c"),
+            ]),
+            parse(vec![
+                Token::Literal("text a"),
+                Token::SectionOpener(SectionType::Conditional, simple_name("x")),
+                Token::Literal("text b"),
+                Token::SectionCloser(simple_name("x")),
+                Token::Literal("text c"),
+            ]).unwrap()
+        )
+    }
+
+    #[test]
+    fn simple_negative_conditional() {
+        assert_eq!(
+            Ast::Sequence(vec![
+                Ast::Literal("text a"),
+                Ast::NegativeConditional {
+                    name: simple_name("x"),
+                    nested: Box::new(Ast::Sequence(vec![
+                        Ast::Literal("text b"),
+                    ]))
+                },
+                Ast::Literal("text c"),
+            ]),
+            parse(vec![
+                Token::Literal("text a"),
+                Token::SectionOpener(SectionType::NegativeConditional, simple_name("x")),
+                Token::Literal("text b"),
+                Token::SectionCloser(simple_name("x")),
+                Token::Literal("text c"),
+            ]).unwrap()
+        )
+    }
+
+    #[test]
+    fn simple_scope() {
+        assert_eq!(
+            Ast::Sequence(vec![
+                Ast::Literal("text a"),
+                Ast::Scope {
+                    name: simple_name("x"),
+                    nested: Box::new(Ast::Sequence(vec![
+                        Ast::Literal("text b"),
+                    ]))
+                },
+                Ast::Literal("text c"),
+            ]),
+            parse(vec![
+                Token::Literal("text a"),
+                Token::SectionOpener(SectionType::Scope, simple_name("x")),
                 Token::Literal("text b"),
                 Token::SectionCloser(simple_name("x")),
                 Token::Literal("text c"),
