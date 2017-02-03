@@ -147,6 +147,23 @@ fn it_supports_conditional_scope_with_boolean() {
 }
 
 #[test]
+fn it_supports_negative_conditional_scope_with_boolean() {
+    #[derive(BartDisplay)]
+    #[template_string="{{^a?}}no{{/a}}"]
+    struct Test { a: bool }
+
+    assert_eq!(
+        "",
+        format!("{}", Test { a: true })
+    );
+
+    assert_eq!(
+        "no",
+        format!("{}", Test { a: false })
+    );
+}
+
+#[test]
 fn it_supports_conditional_scope_with_non_bool() {
     extern crate bart;
 
