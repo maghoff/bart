@@ -13,6 +13,18 @@ fn it_works() {
 }
 
 #[test]
+fn it_handles_names_with_underscore() {
+    #[derive(BartDisplay)]
+    #[template_string="Hello, {{your_name}}"]
+    struct Test { your_name: String }
+
+    assert_eq!(
+        "Hello, World",
+        format!("{}", Test { your_name: "World".to_owned() })
+    );
+}
+
+#[test]
 fn it_can_borrow() {
     #[derive(BartDisplay)]
     #[template_string="Hello, {{name}}"]
