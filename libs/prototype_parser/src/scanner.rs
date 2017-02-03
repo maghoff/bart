@@ -60,10 +60,40 @@ fn unescaped_interpolation<'a>(input: &'a str) -> Result<Token<'a>, Error> {
 }
 
 fn section_opener<'a>(input: &'a str) -> Result<Token<'a>, Error> {
-    let input = consume(input, "#")?;
+    enum Head { Positive, Negative };
+    enum Tail { Conditional, Scope, None };
+
+    let input = input.trim();
+
+    let head = match input.chars().next() {
+        Some('#') => Ok(Head::Positive),
+        Some('^') => Ok(Head::Negative),
+        _ => Err(Error::Mismatch),
+    }?;
+    let input = &input[1..];
+
+    let (input, tail) = if input.ends_with('?') {
+        (&input[..input.len()-1], Tail::Conditional)
+    } else if input.ends_with('.') {
+        (&input[..input.len()-1], Tail::Scope)
+    } else {
+        (input, Tail::None)
+    };
+
     let (rest, name) = name(input)?;
+
     at_end(rest)?;
-    Ok(Token::SectionOpener(SectionType::Iteration, name))
+
+    let section_type = match (head, tail) {
+        (Head::Positive, Tail::None) => Ok(SectionType::Iteration),
+        (Head::Negative, Tail::None) => Ok(SectionType::NegativeIteration),
+        (Head::Positive, Tail::Conditional) => Ok(SectionType::Conditional),
+        (Head::Negative, Tail::Conditional) => Ok(SectionType::NegativeConditional),
+        (Head::Positive, Tail::Scope) => Ok(SectionType::Scope),
+        _ => Err(Error::Mismatch),
+    }?;
+
+    Ok(Token::SectionOpener(section_type, name))
 }
 
 fn section_closer<'a>(input: &'a str) -> Result<Token<'a>, Error> {
@@ -88,6 +118,7 @@ fn bart_tag<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
 
     let tag = match peek {
         Some('#') => section_opener(tag_meat)?,
+        Some('^') => section_opener(tag_meat)?,
         Some('/') => section_closer(tag_meat)?,
         Some('{') => unescaped_interpolation(tag_meat)?,
         Some(_) => interpolation(tag_meat)?,
@@ -185,10 +216,42 @@ mod tests {
     }
 
     #[test]
-    fn bart_tag_matches_section_opener() {
+    fn bart_tag_matches_iteration_section_opener() {
         assert_eq!(
             Ok(("", Token::SectionOpener(SectionType::Iteration, simple_name("ape")))),
             bart_tag("{{#ape}}")
+        );
+    }
+
+    #[test]
+    fn bart_tag_matches_negative_iteration_section_opener() {
+        assert_eq!(
+            Ok(("", Token::SectionOpener(SectionType::NegativeIteration, simple_name("ape")))),
+            bart_tag("{{^ape}}")
+        );
+    }
+
+    #[test]
+    fn bart_tag_matches_conditional_section_opener() {
+        assert_eq!(
+            Ok(("", Token::SectionOpener(SectionType::Conditional, simple_name("ape")))),
+            bart_tag("{{#ape?}}")
+        );
+    }
+
+    #[test]
+    fn bart_tag_matches_negative_conditional_section_opener() {
+        assert_eq!(
+            Ok(("", Token::SectionOpener(SectionType::NegativeConditional, simple_name("ape")))),
+            bart_tag("{{^ape?}}")
+        );
+    }
+
+    #[test]
+    fn bart_tag_matches_scope_section_opener() {
+        assert_eq!(
+            Ok(("", Token::SectionOpener(SectionType::Scope, simple_name("ape")))),
+            bart_tag("{{#ape.}}")
         );
     }
 
