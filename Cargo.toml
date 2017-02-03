@@ -6,7 +6,7 @@ keywords = ["web", "templating"]
 license = "MIT"
 name = "bart"
 repository = "https://github.com/maghoff/bart"
-version = "0.0.1"
+version = "0.1.0"
 readme = "README.md"
 
 [dependencies]
@@ -16,7 +16,7 @@ nom = "2.0.1"
 
 [dev-dependencies.bart_derive]
 path = "libs/bart_derive"
-version = "0.0.1"
+version = "0.1.0"
 
 [features]
 default = []

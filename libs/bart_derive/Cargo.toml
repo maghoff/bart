@@ -5,7 +5,7 @@ keywords = ["web", "templating"]
 license = "MIT"
 name = "bart_derive"
 repository = "https://github.com/maghoff/bart"
-version = "0.0.1"
+version = "0.1.0"
 
 [dependencies]
 nom = "2.0.1"
@@ -18,7 +18,7 @@ syn = "0.10.5"
 
 [dev-dependencies.bart]
 path = "../../"
-version = "0.0.1"
+version = "0.1.0"
 
 [lib]
 proc-macro = true
