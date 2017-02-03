@@ -25,6 +25,18 @@ fn it_handles_names_with_underscore() {
 }
 
 #[test]
+fn it_handles_some_whitespace() {
+    #[derive(BartDisplay)]
+    #[template_string="Hello, {{  name  }}"]
+    struct Test { name: String }
+
+    assert_eq!(
+        "Hello, World",
+        format!("{}", Test { name: "World".to_owned() })
+    );
+}
+
+#[test]
 fn it_can_borrow() {
     #[derive(BartDisplay)]
     #[template_string="Hello, {{name}}"]
