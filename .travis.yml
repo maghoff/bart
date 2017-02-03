@@ -8,7 +8,6 @@ matrix:
     - rust: nightly
 env:
   - CRATE=libs/bart_derive
-  - CRATE=libs/prototype_parser
   - CRATE=.
 script:
   - cd "$CRATE"

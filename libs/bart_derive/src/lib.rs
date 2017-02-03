@@ -6,7 +6,9 @@ extern crate proc_macro;
 extern crate syn;
 
 mod ast;
-mod parsbart;
+mod parser;
+mod scanner;
+mod token;
 
 use proc_macro::TokenStream;
 
@@ -14,7 +16,24 @@ use ast::Ast;
 use std::fs::File;
 use std::io::prelude::*;
 
-fn generate(node: Ast, scope_level: usize) -> quote::Tokens {
+impl<'a> token::Name<'a> {
+    pub fn resolve(&self, scope_depth: u32) -> String {
+        let root = match self.leading_dots {
+            0 => "self".to_owned(),
+            x => format!("_s{}", scope_depth.checked_sub(x).expect("Too many dots")),
+        };
+
+        let mut buf = root;
+        for ref segment in &self.segments {
+            buf.push('.');
+            buf.push_str(segment);
+        }
+
+        buf
+    }
+}
+
+fn generate(node: Ast, scope_level: u32) -> quote::Tokens {
     use Ast::*;
     match node {
         Sequence(seq) => {
@@ -75,6 +94,7 @@ fn generate(node: Ast, scope_level: usize) -> quote::Tokens {
                 }
             }
         },
+        _ => unimplemented!()
     }
 }
 
@@ -98,18 +118,18 @@ fn buf_file(filename: &str) -> String {
     buf
 }
 
+fn parse_str(input: &str) -> Result<Ast, parser::Error> {
+    parser::parse(scanner::sequence(input).unwrap())
+}
+
 #[proc_macro_derive(BartDisplay, attributes(template, template_string))]
 pub fn bart_display(input: TokenStream) -> TokenStream {
     use std::env;
-    use std::path::PathBuf;
 
     let s = input.to_string();
     let ast = syn::parse_macro_input(&s).unwrap();
 
-    let user_crate_root = PathBuf::from(
-        env::var("CARGO_MANIFEST_DIR")
-            .expect("CARGO_MANIFEST_DIR must be set to the root path of the crate")
-    );
+    let user_crate_root = env::current_dir().expect("Unable to get current directory");
 
     let mut dependencies = Vec::<String>::new();
 
@@ -126,7 +146,7 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
         dependencies.push(user_crate_root.join(filename).to_str().unwrap().to_owned());
     }
 
-    let parsed = parsbart::parse_str(&template).unwrap();
+    let parsed = parse_str(&template).unwrap();
     let generated = generate(parsed, 1);
 
     let name = &ast.ident;

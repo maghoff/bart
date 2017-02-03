@@ -1,8 +1,0 @@
-[package]
-authors = ["Magnus Hoff <maghoff@gmail.com>"]
-name = "prototype_parser"
-version = "0.1.0"
-
-[dependencies]
-num = "0.1.36"
-syn = "0.11.0"

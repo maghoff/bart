@@ -24,13 +24,22 @@ fn not_dot(ch: char) -> bool {
 }
 
 fn name<'a>(input: &'a str) -> Result<(&'a str, Name<'a>), Error> {
-    let leading_dots = input.find(not_dot).ok_or(Error::Mismatch)?;
-    let input = &input[leading_dots..];
+    let input = input.trim();
+
+    let leading_dots = input.find(not_dot).unwrap_or(input.len());
+    let input = &input[leading_dots..].trim_left();
+
+    if leading_dots == 0 && input.len() == 0 {
+        return Err(Error::Mismatch);
+    }
 
     let mut segments = vec![];
-    for segment in input.split('.') {
-        syn::parse_ident(segment).map_err(|_| Error::Mismatch)?;
-        segments.push(segment);
+
+    if input.len() > 0 {
+        for segment in input.split('.') {
+            syn::parse_ident(segment).map_err(|_| Error::Mismatch)?;
+            segments.push(segment);
+        }
     }
 
     Ok((&input[0..0], Name {
@@ -349,5 +358,47 @@ mod tests {
             Interpolation(Name { leading_dots: 0, segments: vec!["a", "b", "c"] }),
             Interpolation(Name { leading_dots: 2, segments: vec!["b", "c", "d"] }),
         ], parsed);
+    }
+
+    #[test]
+    fn tags_with_segmentless_name() {
+        let parsed = sequence("{{.}}{{..}}").unwrap();
+        assert_eq!(vec![
+            Interpolation(Name { leading_dots: 1, segments: vec![] }),
+            Interpolation(Name { leading_dots: 2, segments: vec![] }),
+        ], parsed);
+    }
+
+    #[test]
+    fn tags_with_segmentless_name_missing_dots() {
+        match sequence("{{}}") {
+            Ok(_) => panic!(),
+            Err(_) => (),
+        }
+    }
+
+    #[test]
+    fn simple_name_parses() {
+        assert_eq!(Ok(("", simple_name("ape"))), name("ape"));
+    }
+
+    #[test]
+    fn name_with_whitespace() {
+        assert_eq!(Ok(("", simple_name("ape"))), name("  ape  "));
+    }
+
+    #[test]
+    fn name_with_leading_dots() {
+        assert_eq!(Ok(("", Name { leading_dots: 1, segments: vec!["ape"] })), name(".ape"));
+    }
+
+    #[test]
+    fn name_with_multiple_segments() {
+        assert_eq!(Ok(("", Name { leading_dots: 0, segments: vec!["ape", "skrekk"] })), name("ape.skrekk"));
+    }
+
+    #[test]
+    fn name_without_any_segments() {
+        assert_eq!(Ok(("", Name { leading_dots: 1, segments: vec![] })), name("."));
     }
 }
