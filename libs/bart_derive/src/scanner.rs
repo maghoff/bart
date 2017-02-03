@@ -287,6 +287,12 @@ mod tests {
     }
 
     #[test]
+    fn error_on_invalid_tag_2() {
+        let res = bart_tag("{{ape-skrekk}}");
+        assert!(res.is_err());
+    }
+
+    #[test]
     fn literal_reads_until_tag() {
         assert_eq!(
             Ok(("{{ape}}", Some(Token::Literal("head")))),
