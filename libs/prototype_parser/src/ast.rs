@@ -6,5 +6,5 @@ pub enum Ast<'a> {
     Interpolation(token::Name<'a>),
     UnescapedInterpolation(token::Name<'a>),
     Sequence(Vec<Ast<'a>>),
-    Section { name: token::Name<'a>, nested: Box<Ast<'a>> },
+    Iteration { name: token::Name<'a>, nested: Box<Ast<'a>> },
 }

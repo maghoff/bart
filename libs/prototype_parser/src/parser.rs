@@ -1,6 +1,6 @@
 use ast::Ast;
 use std::iter::*;
-use token::Token;
+use token::*;
 
 #[derive(Debug)]
 pub enum Error<'a> {
@@ -10,12 +10,12 @@ pub enum Error<'a> {
 fn section<'a, T>(token_stream: &mut Peekable<T>) -> Result<Ast<'a>, Error<'a>>
     where T: Iterator<Item=Token<'a>>
 {
-    let name = match token_stream.next() {
-        Some(Token::SectionOpener(name)) => Ok(name),
+    let (section_type, name) = match token_stream.next() {
+        Some(Token::SectionOpener(section_type, name)) => Ok((section_type, name)),
         x => Err(Error::Mismatch { expected: "section opener", found: x })
     }?;
 
-    let nested = sequence(token_stream)?;
+    let nested = Box::new(sequence(token_stream)?);
 
     match token_stream.next() {
         Some(Token::SectionCloser(ref close_name)) if close_name == &name
@@ -23,7 +23,13 @@ fn section<'a, T>(token_stream: &mut Peekable<T>) -> Result<Ast<'a>, Error<'a>>
         x => Err(Error::Mismatch { expected: "section closer", found: x })
     }?;
 
-    Ok(Ast::Section { name: name, nested: Box::new(nested) })
+    Ok(match section_type {
+        SectionType::Iteration => Ast::Iteration { name: name, nested: nested },
+        SectionType::NegativeIteration => unimplemented!(),
+        SectionType::Conditional => unimplemented!(),
+        SectionType::NegativeConditional => unimplemented!(),
+        SectionType::Scope => unimplemented!(),
+    })
 }
 
 fn sequence<'a, T>(token_stream: &mut Peekable<T>) -> Result<Ast<'a>, Error<'a>>
@@ -47,7 +53,7 @@ fn sequence<'a, T>(token_stream: &mut Peekable<T>) -> Result<Ast<'a>, Error<'a>>
                         _ => panic!("Outer match should guarantee match in inner match"),
                     }
                 },
-                Some(&Token::SectionOpener(_)) => section(token_stream)?,
+                Some(&Token::SectionOpener(..)) => section(token_stream)?,
                 _ => break
             }
         )
@@ -80,7 +86,6 @@ pub fn parse<'a, T>(token_stream: T) -> Result<Ast<'a>, Error<'a>>
 #[cfg(test)]
 mod test {
     use super::*;
-    use token::*;
 
     #[test]
     fn it_works() {
@@ -95,11 +100,11 @@ mod test {
     }
 
     #[test]
-    fn simple_section() {
+    fn simple_iteration_section() {
         assert_eq!(
             Ast::Sequence(vec![
                 Ast::Literal("text a"),
-                Ast::Section {
+                Ast::Iteration {
                     name: simple_name("x"),
                     nested: Box::new(Ast::Sequence(vec![
                         Ast::Literal("text b"),
@@ -109,7 +114,7 @@ mod test {
             ]),
             parse(vec![
                 Token::Literal("text a"),
-                Token::SectionOpener(simple_name("x")),
+                Token::SectionOpener(SectionType::Iteration, simple_name("x")),
                 Token::Literal("text b"),
                 Token::SectionCloser(simple_name("x")),
                 Token::Literal("text c"),
@@ -120,7 +125,7 @@ mod test {
     #[test]
     fn section_closer_mismatch() {
         let res = parse(vec![
-            Token::SectionOpener(simple_name("x")),
+            Token::SectionOpener(SectionType::Iteration, simple_name("x")),
             Token::SectionCloser(simple_name("y")),
         ]);
 

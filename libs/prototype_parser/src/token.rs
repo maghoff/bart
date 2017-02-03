@@ -5,11 +5,29 @@ pub struct Name<'a> {
 }
 
 #[derive(Debug, PartialEq, Eq)]
+pub enum SectionType {
+    // {{#section}}
+    Iteration,
+
+    // {{^section}}
+    NegativeIteration,
+
+    // {{#section?}}
+    Conditional,
+
+    // {{^section?}}
+    NegativeConditional,
+
+    // {{#section.}}
+    Scope,
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub enum Token<'a> {
     Literal(&'a str),
     Interpolation(Name<'a>),
     UnescapedInterpolation(Name<'a>),
-    SectionOpener(Name<'a>),
+    SectionOpener(SectionType, Name<'a>),
     SectionCloser(Name<'a>),
 }
 

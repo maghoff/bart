@@ -63,7 +63,7 @@ fn section_opener<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     let input = consume(input, "#")?;
     let (rest, name) = name(input)?;
     at_end(rest)?;
-    Ok(Token::SectionOpener(name))
+    Ok(Token::SectionOpener(SectionType::Iteration, name))
 }
 
 fn section_closer<'a>(input: &'a str) -> Result<Token<'a>, Error> {
@@ -187,7 +187,7 @@ mod tests {
     #[test]
     fn bart_tag_matches_section_opener() {
         assert_eq!(
-            Ok(("", Token::SectionOpener(simple_name("ape")))),
+            Ok(("", Token::SectionOpener(SectionType::Iteration, simple_name("ape")))),
             bart_tag("{{#ape}}")
         );
     }
@@ -263,7 +263,7 @@ mod tests {
             Literal("Hello "),
             Interpolation(simple_name("name")),
             Literal("! "),
-            SectionOpener(simple_name("list")),
+            SectionOpener(SectionType::Iteration, simple_name("list")),
             Literal("Welcome"),
             SectionCloser(simple_name("list")),
         ], parsed);
