@@ -14,11 +14,5 @@ quick-error = "1.1.0"
 quote = "0.3.10"
 syn = "0.10.5"
 
-[dev-dependencies]
-
-[dev-dependencies.bart]
-path = "../../"
-version = "0.1.0"
-
 [lib]
 proc-macro = true
