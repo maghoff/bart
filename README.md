@@ -36,7 +36,7 @@ Running this program will output
 
     Hello World
 
-You can run this example by cloning this repository and executing `cargo run --example test`.
+You can run this example by cloning this repository and executing `cargo run --example hello_world`.
 
 Line by line
 ------------
