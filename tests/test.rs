@@ -25,6 +25,18 @@ fn it_handles_names_with_underscore() {
 }
 
 #[test]
+fn it_handles_tuple_struct_field_names() {
+    #[derive(BartDisplay)]
+    #[template_string="Hello, {{0}}"]
+    struct Test<'a>(&'a str);
+
+    assert_eq!(
+        "Hello, World",
+        format!("{}", Test("World"))
+    );
+}
+
+#[test]
 fn it_handles_some_whitespace() {
     #[derive(BartDisplay)]
     #[template_string="Hello, {{  name  }}"]

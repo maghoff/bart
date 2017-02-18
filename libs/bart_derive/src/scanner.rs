@@ -37,7 +37,13 @@ fn name<'a>(input: &'a str) -> Result<(&'a str, Name<'a>), Error> {
 
     if input.len() > 0 {
         for segment in input.split('.') {
-            syn::parse_ident(segment).map_err(|_| Error::Mismatch)?;
+            let ident = syn::parse_ident(segment);
+            let number = segment.parse::<u32>();
+
+            if ident.is_err() && number.is_err() {
+                return Err(Error::Mismatch);
+            }
+
             segments.push(segment);
         }
     }
@@ -400,11 +406,16 @@ mod tests {
 
     #[test]
     fn name_with_multiple_segments() {
-        assert_eq!(Ok(("", Name { leading_dots: 0, segments: vec!["ape", "skrekk"] })), name("ape.skrekk"));
+        assert_eq!(Ok(("", Name { leading_dots: 0, segments: vec!["ape", "2", "skrekk"] })), name("ape.2.skrekk"));
     }
 
     #[test]
     fn name_without_any_segments() {
         assert_eq!(Ok(("", Name { leading_dots: 1, segments: vec![] })), name("."));
+    }
+
+    #[test]
+    fn tuple_struct_name() {
+        assert_eq!(Ok(("", simple_name("0"))), name("0"));
     }
 }
