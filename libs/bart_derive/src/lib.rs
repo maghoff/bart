@@ -59,6 +59,16 @@ fn generate(node: Ast, scope_level: u32) -> quote::Tokens {
                 }
             }
         },
+        NegativeIteration { name, nested } => {
+            let name = syn::Ident::new(name.resolve(scope_level));
+            let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
+            let nested_generated = generate(*nested, scope_level + 1);
+            quote! {
+                for ref #scope_variable in _bart::NegativeIterator::neg_iter(&#name) {
+                    #nested_generated
+                }
+            }
+        },
         Conditional { name, nested } => {
             let name = syn::Ident::new(name.resolve(scope_level));
             let scope_variable = syn::Ident::new(format!("_s{}", scope_level));
@@ -92,7 +102,6 @@ fn generate(node: Ast, scope_level: u32) -> quote::Tokens {
                 }
             }
         },
-        _ => unimplemented!()
     }
 }
 
