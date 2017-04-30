@@ -8,6 +8,7 @@ performing full variable resolution and type checking at compile time.
  1. [Cargo dependencies](#cargo-dependencies)
  2. [Example](#example)
     1. [Line-by-line](#line-by-line)
+ 3. [Bart language reference](#bart-language-reference)
 
 Cargo dependencies
 ==================
@@ -93,6 +94,62 @@ fn main() {
 As noted above, `bart_derive` has now generated an `impl` of [`Display`][Display] for `HelloWorld`. This means we can pass instances of `HelloWorld` to `print!`, `write!`, `format!` and so on. The template is rendered with the supplied data, generating `Hello World` to standard output.
 
 [Display]: https://doc.rust-lang.org/std/fmt/trait.Display.html
+
+Bart language reference
+=======================
+Bart supports: [interpolation](#interpolation), [verbatim
+interpolation](#verbatim-interpolation), &hellip;
+
+Interpolation
+-------------
+```
+# #[macro_use] extern crate bart_derive;
+# #[derive(BartDisplay)]
+# #[template_string = "\
+Hello {{name}}
+# "]
+# struct HelloWorld<'a> {
+#     name: &'a str,
+# }
+#
+# fn main() {
+#     assert_eq!(
+#         "Hello World &lt; &amp;\n",
+#         format!("{}", &HelloWorld { name: "World < &" })
+#     );
+# }
+```
+Include fields by delegating to the [`Display`][Display] trait.
+
+Interpolations are HTML escaped, so it is safe to include user input this way.
+
+Verbatim interpolation
+----------------------
+```
+# #[macro_use] extern crate bart_derive;
+# #[derive(BartDisplay)]
+# #[template_string = "\
+Hello {{{name}}}
+# "]
+# struct HelloWorld<'a> {
+#     name: &'a str,
+# }
+#
+# fn main() {
+#     assert_eq!(
+#         "Hello World < &\n",
+#         format!("{}", &HelloWorld { name: "World < &" })
+#     );
+# }
+```
+Include fields by delegating to the [`Display`][Display] trait.
+
+Verbatim interpolations are not HTML escaped and are suitable for including
+HTML content that is otherwise known to be safe.
+
+It can be valuable to use verbatim interpolation to include other Bart
+templates.
+
 
 */
 
