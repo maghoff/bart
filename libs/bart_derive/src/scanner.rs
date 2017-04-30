@@ -118,6 +118,11 @@ fn section_closer<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     Ok(Token::SectionCloser(name))
 }
 
+fn partial_include<'a>(input: &'a str) -> Result<Token<'a>, Error> {
+    let partial_name = consume(input, ">")?.trim();
+    Ok(Token::PartialInclude(partial_name, Name { leading_dots: 1, segments: vec![] }))
+}
+
 fn bart_tag<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
     let input = consume(input, TAG_OPENER)?;
 
@@ -135,6 +140,7 @@ fn bart_tag<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
         Some('#') => section_opener(tag_meat)?,
         Some('^') => section_opener(tag_meat)?,
         Some('/') => section_closer(tag_meat)?,
+        Some('>') => partial_include(tag_meat)?,
         Some('{') => unescaped_interpolation(tag_meat)?,
         Some(_) => interpolation(tag_meat)?,
         None => return Err(Error::Mismatch),
@@ -275,6 +281,14 @@ mod tests {
         assert_eq!(
             Ok(("", Token::SectionCloser(simple_name("ape")))),
             bart_tag("{{/ape}}")
+        );
+    }
+
+    #[test]
+    fn bart_tag_matches_partial_include() {
+        assert_eq!(
+            Ok(("", Token::PartialInclude("ape", Name { leading_dots: 1, segments: vec![] }))),
+            bart_tag("{{>ape}}")
         );
     }
 

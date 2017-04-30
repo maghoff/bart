@@ -29,6 +29,7 @@ pub enum Token<'a> {
     UnescapedInterpolation(Name<'a>),
     SectionOpener(SectionType, Name<'a>),
     SectionCloser(Name<'a>),
+    PartialInclude(&'a str, Name<'a>),
 }
 
 #[cfg(test)]
