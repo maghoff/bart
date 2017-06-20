@@ -1,13 +1,13 @@
 [package]
 authors = ["Magnus Hoff <maghoff@gmail.com>"]
 description = "A compile time templating language inspired by Mustache"
-documentation = "https://docs.rs/bart/0.1.0/bart/"
+documentation = "https://docs.rs/bart/0.1.1/bart/"
 keywords = ["web", "templating", "template-engine", "template-language"]
 categories = ["template-engine"]
 license = "MIT"
 name = "bart"
 repository = "https://github.com/maghoff/bart"
-version = "0.1.0"
+version = "0.1.1"
 readme = "README.md"
 
 [badges]
@@ -20,6 +20,7 @@ nom = "2.0.1"
 
 [dev-dependencies.bart_derive]
 path = "libs/bart_derive"
+version = "0.1.1"
 
 [features]
 default = []
