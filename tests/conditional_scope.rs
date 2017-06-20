@@ -62,3 +62,54 @@ fn it_supports_conditional_scope_with_non_bool() {
         format!("{}", Test { cond: TestBool { name: "No" } })
     );
 }
+
+#[test]
+fn it_supports_conditional_scope_with_vec() {
+    #[derive(BartDisplay)]
+    #[template_string="{{#a?}}yes{{/a}}"]
+    struct Test { a: Vec<i32> }
+
+    assert_eq!(
+        "yes",
+        format!("{}", Test { a: vec![1] })
+    );
+
+    assert_eq!(
+        "",
+        format!("{}", Test { a: vec![] })
+    );
+}
+
+#[test]
+fn it_supports_conditional_scope_with_borrowed_vec() {
+    #[derive(BartDisplay)]
+    #[template_string="{{#a?}}yes{{/a}}"]
+    struct Test<'a> { a: &'a Vec<i32> }
+
+    assert_eq!(
+        "yes",
+        format!("{}", Test { a: &vec![1, 2, 3] })
+    );
+
+    assert_eq!(
+        "",
+        format!("{}", Test { a: &vec![] })
+    );
+}
+
+#[test]
+fn it_supports_conditional_scope_with_slice() {
+    #[derive(BartDisplay)]
+    #[template_string="{{#a?}}yes{{/a}}"]
+    struct Test<'a> { a: &'a [i32] }
+
+    assert_eq!(
+        "yes",
+        format!("{}", Test { a: &[1] })
+    );
+
+    assert_eq!(
+        "",
+        format!("{}", Test { a: &[] })
+    );
+}

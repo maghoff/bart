@@ -32,6 +32,7 @@ impl<'a, T, E> NegativeIterator for &'a Result<T, E> {
 }
 
 // TODO impl for Vec<_> that checks if len() == 0
+//  -> Maybe tell people to use negative conditional instead {{^vec?}}...
 // TODO impl for [T]
 
 #[cfg(test)]
