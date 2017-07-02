@@ -83,3 +83,18 @@ fn it_passes_through() {
         format!("{}", Test { txt: "<&\"'" })
     );
 }
+
+#[test]
+fn template_root_element() {
+    struct Nested<'a> { name: &'a str }
+
+    #[derive(BartDisplay)]
+    #[template_string="Hello, {{name}}"]
+    #[template_root="0"]
+    struct Test<'a>(Nested<'a>);
+
+    assert_eq!(
+        "Hello, World",
+        format!("{}", Test(Nested { name: "World" }))
+    );
+}

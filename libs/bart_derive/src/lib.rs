@@ -17,7 +17,7 @@ use std::io::prelude::*;
 impl<'a> token::Name<'a> {
     pub fn resolve(&self, scope_depth: u32) -> String {
         let root = match self.leading_dots {
-            0 => "self".to_owned(),
+            0 => "_s0".to_owned(),
             x => format!("_s{}", scope_depth.checked_sub(x).expect("Too many dots")),
         };
 
@@ -129,7 +129,7 @@ fn parse_str(input: &str) -> Result<Ast, parser::Error> {
     parser::parse(scanner::sequence(input).unwrap())
 }
 
-#[proc_macro_derive(BartDisplay, attributes(template, template_string))]
+#[proc_macro_derive(BartDisplay, attributes(template, template_string, template_root))]
 pub fn bart_display(input: TokenStream) -> TokenStream {
     use std::env;
 
@@ -153,6 +153,11 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
         dependencies.push(user_crate_root.join(filename).to_str().unwrap().to_owned());
     }
 
+    let template_root = syn::Ident::new(find_attr(&ast.attrs, "template_root")
+        .map(|x| scanner::segmented_name(&x).expect("Syntax error in template_root"))
+        .map(|x| format!("self.{}", x.join(".")))
+        .unwrap_or("self".to_owned()));
+
     let parsed = parse_str(&template).unwrap();
     let generated = generate(parsed, 1);
 
@@ -173,7 +178,7 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
                         let _ = include_bytes!(#dependencies);
                     )*
 
-                    let ref _s0 = self;
+                    let ref _s0 = #template_root;
 
                     #generated
 

@@ -23,6 +23,25 @@ fn not_dot(ch: char) -> bool {
     ch != '.'
 }
 
+pub fn segmented_name<'a>(input: &'a str) -> Result<Vec<&'a str>, Error> {
+    if input.len() > 0 {
+        input.split('.')
+            .map(|segment| {
+                let ident = syn::parse_ident(segment);
+                let number = segment.parse::<u32>();
+
+                if ident.is_err() && number.is_err() {
+                    return Err(Error::Mismatch);
+                }
+
+                Ok(segment)
+            })
+            .collect()
+    } else {
+        Ok(vec![])
+    }
+}
+
 fn name<'a>(input: &'a str) -> Result<(&'a str, Name<'a>), Error> {
     let input = input.trim();
 
@@ -33,20 +52,7 @@ fn name<'a>(input: &'a str) -> Result<(&'a str, Name<'a>), Error> {
         return Err(Error::Mismatch);
     }
 
-    let mut segments = vec![];
-
-    if input.len() > 0 {
-        for segment in input.split('.') {
-            let ident = syn::parse_ident(segment);
-            let number = segment.parse::<u32>();
-
-            if ident.is_err() && number.is_err() {
-                return Err(Error::Mismatch);
-            }
-
-            segments.push(segment);
-        }
-    }
+    let segments = segmented_name(input)?;
 
     Ok((&input[0..0], Name {
         leading_dots: num::cast::cast(leading_dots).unwrap(),
@@ -401,6 +407,26 @@ mod tests {
             Ok(_) => panic!(),
             Err(_) => (),
         }
+    }
+
+    #[test]
+    fn simple_segmented_name_parses() {
+        assert_eq!(Ok(vec!["ape"]), segmented_name("ape"));
+    }
+
+    #[test]
+    fn simple_segmented_name_with_segments_parses() {
+        assert_eq!(Ok(vec!["ape", "katt"]), segmented_name("ape.katt"));
+    }
+
+    #[test]
+    fn simple_segmented_name_denies_leading_dots() {
+        assert!(segmented_name(".ape.katt").is_err());
+    }
+
+    #[test]
+    fn simple_segmented_name_denies_funny_syntax() {
+        assert!(segmented_name("ape.ka tt").is_err());
     }
 
     #[test]

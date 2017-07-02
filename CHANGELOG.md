@@ -2,6 +2,24 @@ Changelog
 =========
 This is a high-level overview of the changes that made it into a given version.
 
+Next version
+------------
+New in this version:
+
+ * Specify the root element for template rendering with the `template_root` attribute:
+
+        struct Nested<'a> { name: &'a str }
+
+        #[derive(BartDisplay)]
+        #[template_string="Hello, {{name}}"]
+        #[template_root="0"]
+        struct Test<'a>(Nested<'a>);
+
+        assert_eq!(
+            "Hello, World",
+            format!("{}", Test(Nested { name: "World" }))
+        );
+
 Version 0.1.1
 -------------
 New in this version:
