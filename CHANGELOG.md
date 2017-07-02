@@ -2,8 +2,8 @@ Changelog
 =========
 This is a high-level overview of the changes that made it into a given version.
 
-Next version
-------------
+Version 0.1.2
+-------------
 New in this version:
 
  * Specify the root element for template rendering with the `template_root` attribute:
