@@ -59,6 +59,14 @@ fn sequence<'a, T>(token_stream: &mut Peekable<T>) -> Result<Ast<'a>, Error<'a>>
                     }
                 },
                 Some(&Token::SectionOpener(..)) => section(token_stream)?,
+                Some(&Token::PartialInclude(..)) => {
+                    match token_stream.next() {
+                        Some(Token::PartialInclude(partial_name, root)) => {
+                            Ast::PartialInclude { partial_name, root }
+                        },
+                        _ => panic!("Outer match should guarantee match in inner match"),
+                    }
+                },
                 _ => break
             }
         )
@@ -241,6 +249,18 @@ mod test {
                 Token::Literal("a"),
                 Token::UnescapedInterpolation(simple_name("b")),
                 Token::Literal("c"),
+            ]).unwrap()
+        )
+    }
+
+    #[test]
+    fn partials() {
+        assert_eq!(
+            Ast::Sequence(vec![
+                Ast::PartialInclude { partial_name: "partial", root: simple_name("a") },
+            ]),
+            parse(vec![
+                Token::PartialInclude("partial", simple_name("a"))
             ]).unwrap()
         )
     }

@@ -14,6 +14,7 @@ use ast::Ast;
 use proc_macro::TokenStream;
 use std::fs::File;
 use std::io::prelude::*;
+use std::path::{Path, PathBuf};
 
 fn find_attr<'a>(attrs: &'a Vec<syn::Attribute>, name: &str) -> Option<&'a str> {
     attrs.iter()
@@ -25,7 +26,7 @@ fn find_attr<'a>(attrs: &'a Vec<syn::Attribute>, name: &str) -> Option<&'a str> 
         .map(|x| x.as_ref())
 }
 
-fn buf_file(filename: &str) -> String {
+fn buf_file<P: AsRef<Path>>(filename: P) -> String {
     let mut f = File::open(filename)
         .expect("Unable to open file for reading");
     let mut buf = String::new();
@@ -39,6 +40,38 @@ fn parse_str(input: &str) -> Result<Ast, parser::Error> {
     parser::parse(scanner::sequence(input).unwrap())
 }
 
+struct InlinePartialsResolver;
+impl generator::PartialsResolver for InlinePartialsResolver {
+    fn generate_partial(&mut self, _partial_name: &str) -> quote::Tokens {
+        panic!("Partials are unavailable when using template_string");
+    }
+}
+
+struct FilesystemPartialsResolver<'a> {
+    base_dir: PathBuf,
+    dependencies: &'a mut Vec<String>,
+}
+
+impl<'a> FilesystemPartialsResolver<'a> {
+    fn new<T: Into<PathBuf>>(base_dir: T, dependencies: &mut Vec<String>) -> FilesystemPartialsResolver {
+        FilesystemPartialsResolver {
+            base_dir: base_dir.into(),
+            dependencies,
+        }
+    }
+}
+
+impl<'a> generator::PartialsResolver for FilesystemPartialsResolver<'a> {
+    fn generate_partial(&mut self, partial_name: &str) -> quote::Tokens {
+        let abs_path = self.base_dir.join(partial_name);
+        self.dependencies.push(abs_path.to_str().unwrap().to_owned());
+        let template = buf_file(&abs_path);
+        let parsed = parse_str(&template).unwrap();
+        let nested_resolver = &mut FilesystemPartialsResolver::new(abs_path.parent().unwrap(), self.dependencies);
+        generator::generate(parsed, 1, nested_resolver)
+    }
+}
+
 #[proc_macro_derive(BartDisplay, attributes(template, template_string, template_root))]
 pub fn bart_display(input: TokenStream) -> TokenStream {
     use std::env;
@@ -50,26 +83,32 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
 
     let mut dependencies = Vec::<String>::new();
 
-    let filename_opt = find_attr(&ast.attrs, "template");
+    let generated = {
+        let (template, mut partials_resolver): (_, Box<generator::PartialsResolver>) =
+            match find_attr(&ast.attrs, "template") {
+                Some(filename) => {
+                    let abs_filename = user_crate_root.join(filename);
+                    dependencies.push(abs_filename.to_str().unwrap().to_owned());
+                    let resolver = FilesystemPartialsResolver::new(abs_filename.parent().unwrap(), &mut dependencies);
+                    (buf_file(filename), Box::new(resolver))
+                },
+                None => {
+                    let template = find_attr(&ast.attrs, "template_string")
+                        .map(|x| x.to_owned())
+                        .expect("#[derive(BartDisplay)] requires #[template = \"(filename)\"] \
+                            or  #[template_string = \"...\"]");
+                    (template, Box::new(InlinePartialsResolver))
+                }
+            };
 
-    let template =
-        filename_opt.map(buf_file)
-            .or_else(||
-                find_attr(&ast.attrs, "template_string").map(|x| x.to_owned())
-            )
-        .expect("#[derive(BartDisplay)] requires #[template = \"(filename)\"] or  #[template_string = \"...\"]");
-
-    if let Some(filename) = filename_opt {
-        dependencies.push(user_crate_root.join(filename).to_str().unwrap().to_owned());
-    }
+        let parsed = parse_str(&template).unwrap();
+        generator::generate(parsed, 1, &mut *partials_resolver)
+    };
 
     let template_root = syn::Ident::new(find_attr(&ast.attrs, "template_root")
         .map(|x| scanner::segmented_name(&x).expect("Syntax error in template_root"))
         .map(|x| format!("self.{}", x.join(".")))
         .unwrap_or("self".to_owned()));
-
-    let parsed = parse_str(&template).unwrap();
-    let generated = generator::generate(parsed, 1);
 
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();

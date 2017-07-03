@@ -11,4 +11,5 @@ pub enum Ast<'a> {
     Conditional { name: token::Name<'a>, nested: Box<Ast<'a>> },
     NegativeConditional { name: token::Name<'a>, nested: Box<Ast<'a>> },
     Scope { name: token::Name<'a>, nested: Box<Ast<'a>> },
+    PartialInclude { partial_name: &'a str, root: token::Name<'a> },
 }
