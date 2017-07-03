@@ -13,6 +13,18 @@ fn it_works() {
 }
 
 #[test]
+fn it_finds_template_files() {
+    #[derive(BartDisplay)]
+    #[template="tests/templates/basic/it_finds_template_files.html"]
+    struct Test { name: String }
+
+    assert_eq!(
+        "Hello, World",
+        format!("{}", Test { name: "World".to_owned() })
+    );
+}
+
+#[test]
 fn it_handles_names_with_underscore() {
     #[derive(BartDisplay)]
     #[template_string="Hello, {{your_name}}"]
