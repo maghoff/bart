@@ -16,6 +16,10 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 
+fn user_crate_root() -> PathBuf {
+    std::env::current_dir().expect("Unable to get current directory")
+}
+
 fn find_attr<'a>(attrs: &'a Vec<syn::Attribute>, name: &str) -> Option<&'a str> {
     attrs.iter()
         .find(|&x| x.name() == name)
@@ -63,7 +67,11 @@ impl<'a> FilesystemPartialsResolver<'a> {
 
 impl<'a> generator::PartialsResolver for FilesystemPartialsResolver<'a> {
     fn generate_partial(&mut self, partial_name: &str) -> quote::Tokens {
-        let abs_path = self.base_dir.join(partial_name);
+        let relative_path: PathBuf = partial_name.into();
+        let abs_path = match relative_path.has_root() {
+            true => user_crate_root().join(relative_path.strip_prefix("/").unwrap()),
+            false => self.base_dir.join(partial_name),
+        };
         self.dependencies.push(abs_path.to_str().unwrap().to_owned());
         let template = buf_file(&abs_path);
         let parsed = parse_str(&template).unwrap();
@@ -74,12 +82,8 @@ impl<'a> generator::PartialsResolver for FilesystemPartialsResolver<'a> {
 
 #[proc_macro_derive(BartDisplay, attributes(template, template_string, template_root))]
 pub fn bart_display(input: TokenStream) -> TokenStream {
-    use std::env;
-
     let s = input.to_string();
     let ast = syn::parse_macro_input(&s).unwrap();
-
-    let user_crate_root = env::current_dir().expect("Unable to get current directory");
 
     let mut dependencies = Vec::<String>::new();
 
@@ -87,7 +91,7 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
         let (template, mut partials_resolver): (_, Box<generator::PartialsResolver>) =
             match find_attr(&ast.attrs, "template") {
                 Some(filename) => {
-                    let abs_filename = user_crate_root.join(filename);
+                    let abs_filename = user_crate_root().join(filename);
                     dependencies.push(abs_filename.to_str().unwrap().to_owned());
                     let resolver = FilesystemPartialsResolver::new(abs_filename.parent().unwrap(), &mut dependencies);
                     (buf_file(filename), Box::new(resolver))

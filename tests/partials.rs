@@ -51,3 +51,15 @@ fn it_allows_named_root_scope() {
         format!("{}", Test { person: Person { name: "World".to_owned() } })
     );
 }
+
+#[test]
+fn it_finds_partials_relative_to_crate_root() {
+    #[derive(BartDisplay)]
+    #[template="tests/templates/partials/it_finds_partials_relative_to_crate_root.html"]
+    struct Test { name: String }
+
+    assert_eq!(
+        "(Hello, World)",
+        format!("{}", Test { name: "World".to_owned() })
+    );
+}
