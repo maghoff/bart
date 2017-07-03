@@ -2,6 +2,18 @@ Changelog
 =========
 This is a high-level overview of the changes that made it into a given version.
 
+Version 0.1.3
+-------------
+New in this version:
+
+ * Include partials in templates: `{{>partial.html}}`
+     * Lookup is relative to the containing template/partial
+     * Use a leading slash to resolve templates from the crate root: `{{>/templates/partial.html}}`
+     * The root scope of the included partial is by default the same as the current scope
+       in the containing template/partial. Override this by giving an argument to the
+       partial include tag: `{{>partial.html nested_scope}}`, `{{>partial.html .member}}` or
+       even an ancestor: `{{>partial.html ...}}`
+
 Version 0.1.2
 -------------
 New in this version:
