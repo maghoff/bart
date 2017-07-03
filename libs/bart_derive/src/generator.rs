@@ -9,7 +9,14 @@ fn resolve(name: &token::Name, scope_depth: u32) -> syn::Ident {
 
     let root = match name.leading_dots {
         0 => "_s0".to_owned(),
-        x => format!("_s{}", scope_depth.checked_sub(x).expect("Too many dots")),
+        x => {
+            let level = scope_depth
+                .checked_sub(x)
+                .unwrap_or_else(|| {
+                    panic!(format!("Too many leading dots ({}) in scope depth of only {}", x, scope_depth));
+                });
+            format!("_s{}", level)
+        },
     };
 
     let full_name = itertools::chain(&[root.as_str()], &name.segments).join(".");
