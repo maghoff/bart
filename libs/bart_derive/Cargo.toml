@@ -10,6 +10,7 @@ version = "0.1.2"
 [dependencies]
 quote = "0.3.10"
 syn = "0.10.5"
+itertools = "0.6.0"
 
 [dependencies.num]
 version = "0.1.36"

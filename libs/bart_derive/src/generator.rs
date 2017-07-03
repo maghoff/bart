@@ -1,21 +1,20 @@
 use ast;
+use itertools;
 use syn;
 use token;
 use quote;
 
 fn resolve(name: &token::Name, scope_depth: u32) -> syn::Ident {
+    use itertools::Itertools;
+
     let root = match name.leading_dots {
         0 => "_s0".to_owned(),
         x => format!("_s{}", scope_depth.checked_sub(x).expect("Too many dots")),
     };
 
-    let mut buf = root;
-    for ref segment in &name.segments {
-        buf.push('.');
-        buf.push_str(segment);
-    }
+    let full_name = itertools::chain(&[root.as_str()], &name.segments).join(".");
 
-    syn::Ident::new(buf)
+    syn::Ident::new(full_name)
 }
 
 fn scope<'a>(name: token::Name, scope_level: u32, ast: ast::Ast<'a>) -> (syn::Ident, syn::Ident, quote::Tokens) {

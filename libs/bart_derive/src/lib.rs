@@ -1,5 +1,6 @@
 #[macro_use] extern crate quote;
 
+extern crate itertools;
 extern crate proc_macro;
 extern crate syn;
 
