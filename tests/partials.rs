@@ -37,3 +37,17 @@ fn it_can_nest_within_iterator() {
         format!("{}", Test { items: &[1, 2, 3] })
     );
 }
+
+#[test]
+fn it_allows_named_root_scope() {
+    struct Person { name: String }
+
+    #[derive(BartDisplay)]
+    #[template="tests/templates/partials/it_allows_named_root_scope.html"]
+    struct Test { person: Person }
+
+    assert_eq!(
+        "(Hello, World)",
+        format!("{}", Test { person: Person { name: "World".to_owned() } })
+    );
+}

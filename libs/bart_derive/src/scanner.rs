@@ -125,8 +125,14 @@ fn section_closer<'a>(input: &'a str) -> Result<Token<'a>, Error> {
 }
 
 fn partial_include<'a>(input: &'a str) -> Result<Token<'a>, Error> {
-    let partial_name = consume(input, ">")?.trim();
-    Ok(Token::PartialInclude(partial_name, Name { leading_dots: 1, segments: vec![] }))
+    let inner = consume(input, ">")?.trim().splitn(2, ' ').collect::<Vec<_>>();
+    let partial_name = inner[0];
+    let segments = match inner.get(1) {
+        Some(root) => name(root)?.1,
+        None => Name { leading_dots: 1, segments: vec![] },
+    };
+
+    Ok(Token::PartialInclude(partial_name, segments))
 }
 
 fn bart_tag<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
