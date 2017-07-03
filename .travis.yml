@@ -6,10 +6,6 @@ rust:
 matrix:
   allow_failures:
     - rust: nightly
-env:
-  - CRATE=libs/bart_derive
-  - CRATE=.
 script:
-  - cd "$CRATE"
-  - cargo build --verbose
-  - cargo test --verbose
+  - cargo build --verbose --all
+  - cargo test --verbose --all
