@@ -31,6 +31,19 @@ impl<'a, T, E> NegativeIterator for &'a Result<T, E> {
     }
 }
 
+impl<'a, T, I, II> NegativeIterator for &'a T
+where
+    II: Iterator,
+    T: NegativeIterator<Item=I, IntoIter=II>,
+{
+    type Item = I;
+    type IntoIter = II;
+
+    fn neg_iter(&self) -> Self::IntoIter {
+        NegativeIterator::neg_iter(*self)
+    }
+}
+
 // TODO impl for Vec<_> that checks if len() == 0
 //  -> Maybe tell people to use negative conditional instead {{^vec?}}...
 // TODO impl for [T]

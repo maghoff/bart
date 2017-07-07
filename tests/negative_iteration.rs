@@ -24,7 +24,6 @@ fn it_includes_none_option() {
     );
 }
 
-#[cfg(does_not_compile)]
 #[test]
 fn it_supports_borrowed_option() {
     #[derive(BartDisplay)]
@@ -34,6 +33,18 @@ fn it_supports_borrowed_option() {
     assert_eq!(
         "[it]",
         format!("{}", Test { x: &None })
+    );
+}
+
+#[test]
+fn it_supports_multiply_borrowed_option() {
+    #[derive(BartDisplay)]
+    #[template_string="[{{^x}}it{{/x}}]"]
+    struct Test<'a> { x: &'a &'a &'a Option<i32> }
+
+    assert_eq!(
+        "[it]",
+        format!("{}", Test { x: &&&None })
     );
 }
 
