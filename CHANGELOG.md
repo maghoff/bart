@@ -2,6 +2,12 @@ Changelog
 =========
 This is a high-level overview of the changes that made it into a given version.
 
+Next version
+------------
+Changed:
+
+ * Fixed some clippy lints and disabled clippy for the generated code
+
 Version 0.1.3
 -------------
 New in this version:

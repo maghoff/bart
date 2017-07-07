@@ -120,7 +120,7 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
     let dummy_const = syn::Ident::new(format!("_IMPL_BART_DISPLAY_FOR_{}", &name));
 
     let gen = quote! {
-        #[allow(non_upper_case_globals, unused_attributes, unused_qualifications)]
+        #[allow(non_upper_case_globals, unused_attributes, unused_qualifications, unknown_lints, clippy)]
         const #dummy_const: () = {
             extern crate bart as _bart;
 
@@ -131,7 +131,7 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
                         let _ = include_bytes!(#dependencies);
                     )*
 
-                    let ref _s0 = #template_root;
+                    let _s0 = &#template_root;
 
                     #generated
 

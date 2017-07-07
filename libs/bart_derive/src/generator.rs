@@ -76,7 +76,7 @@ pub fn generate(node: ast::Ast, scope_level: u32, partials_resolver: &mut Partia
             let (name, scope_variable, nested) = scope(name, scope_level, *nested, partials_resolver);
             quote! {
                 if _bart::Conditional::val(&#name) {
-                    let ref #scope_variable = #name;
+                    let #scope_variable = &#name;
                     #nested
                 }
             }
@@ -85,7 +85,7 @@ pub fn generate(node: ast::Ast, scope_level: u32, partials_resolver: &mut Partia
             let (name, scope_variable, nested) = scope(name, scope_level, *nested, partials_resolver);
             quote! {
                 if !_bart::Conditional::val(&#name) {
-                    let ref #scope_variable = #name;
+                    let #scope_variable = &#name;
                     #nested
                 }
             }
@@ -94,7 +94,7 @@ pub fn generate(node: ast::Ast, scope_level: u32, partials_resolver: &mut Partia
             let (name, scope_variable, nested) = scope(name, scope_level, *nested, partials_resolver);
             quote! {
                 {
-                    let ref #scope_variable = #name;
+                    let #scope_variable = &#name;
                     #nested
                 }
             }
@@ -104,7 +104,7 @@ pub fn generate(node: ast::Ast, scope_level: u32, partials_resolver: &mut Partia
             let nested = partials_resolver.generate_partial(partial_name);
             quote! {
                 {
-                    let ref _s0 = #root;
+                    let _s0 = &#root;
                     #nested
                 }
             }

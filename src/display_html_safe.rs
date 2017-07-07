@@ -24,7 +24,7 @@ named!(part(&str) -> &str,
 impl<'a> Write for EscapingWriter<'a> {
     fn write_str(&mut self, buf: &str) -> fmt::Result {
         let mut rest = buf;
-        while let IResult::Done(new_rest, parsed) = part(&rest) {
+        while let IResult::Done(new_rest, parsed) = part(rest) {
             self.inner.write_str(parsed)?;
             rest = new_rest;
         }
