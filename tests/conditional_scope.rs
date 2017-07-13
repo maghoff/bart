@@ -8,12 +8,12 @@ fn it_supports_conditional_scope_with_boolean() {
 
     assert_eq!(
         "yes",
-        format!("{}", Test { a: true })
+        Test { a: true }.to_string()
     );
 
     assert_eq!(
         "",
-        format!("{}", Test { a: false })
+        Test { a: false }.to_string()
     );
 }
 
@@ -25,12 +25,12 @@ fn it_supports_negative_conditional_scope_with_boolean() {
 
     assert_eq!(
         "",
-        format!("{}", Test { a: true })
+        Test { a: true }.to_string()
     );
 
     assert_eq!(
         "no",
-        format!("{}", Test { a: false })
+        Test { a: false }.to_string()
     );
 }
 
@@ -54,12 +54,12 @@ fn it_supports_conditional_scope_with_non_bool() {
 
     assert_eq!(
         "Joe: Hello Joe",
-        format!("{}", Test { cond: TestBool { name: "Joe" } })
+        Test { cond: TestBool { name: "Joe" } }.to_string()
     );
 
     assert_eq!(
         "No: ",
-        format!("{}", Test { cond: TestBool { name: "No" } })
+        Test { cond: TestBool { name: "No" } }.to_string()
     );
 }
 
@@ -71,12 +71,12 @@ fn it_supports_conditional_scope_with_vec() {
 
     assert_eq!(
         "yes",
-        format!("{}", Test { a: vec![1] })
+        Test { a: vec![1] }.to_string()
     );
 
     assert_eq!(
         "",
-        format!("{}", Test { a: vec![] })
+        Test { a: vec![] }.to_string()
     );
 }
 
@@ -88,12 +88,12 @@ fn it_supports_conditional_scope_with_borrowed_vec() {
 
     assert_eq!(
         "yes",
-        format!("{}", Test { a: &vec![1, 2, 3] })
+        Test { a: &vec![1, 2, 3] }.to_string()
     );
 
     assert_eq!(
         "",
-        format!("{}", Test { a: &vec![] })
+        Test { a: &vec![] }.to_string()
     );
 }
 
@@ -105,11 +105,11 @@ fn it_supports_conditional_scope_with_slice() {
 
     assert_eq!(
         "yes",
-        format!("{}", Test { a: &[1] })
+        Test { a: &[1] }.to_string()
     );
 
     assert_eq!(
         "",
-        format!("{}", Test { a: &[] })
+        Test { a: &[] }.to_string()
     );
 }

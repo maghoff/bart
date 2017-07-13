@@ -10,7 +10,7 @@ fn it_can_access_nested_fields() {
 
     assert_eq!(
         "42",
-        format!("{}", Test { nested: Nested { a: 42 } })
+        Test { nested: Nested { a: 42 } }.to_string()
     );
 }
 
@@ -24,7 +24,7 @@ fn it_can_scope_into_nested_values() {
 
     assert_eq!(
         "42",
-        format!("{}", Test { nested: Nested { a: 42 } })
+        Test { nested: Nested { a: 42 } }.to_string()
     );
 }
 

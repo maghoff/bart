@@ -8,7 +8,7 @@ fn it_works() {
 
     assert_eq!(
         "Hello, World",
-        format!("{}", Test { name: "World".to_owned() })
+        Test { name: "World".to_owned() }.to_string()
     );
 }
 
@@ -20,7 +20,7 @@ fn it_finds_template_files() {
 
     assert_eq!(
         "Hello, World",
-        format!("{}", Test { name: "World".to_owned() })
+        Test { name: "World".to_owned() }.to_string()
     );
 }
 
@@ -32,7 +32,7 @@ fn it_handles_names_with_underscore() {
 
     assert_eq!(
         "Hello, World",
-        format!("{}", Test { your_name: "World".to_owned() })
+        Test { your_name: "World".to_owned() }.to_string()
     );
 }
 
@@ -56,7 +56,7 @@ fn it_handles_some_whitespace() {
 
     assert_eq!(
         "Hello, World",
-        format!("{}", Test { name: "World".to_owned() })
+        Test { name: "World".to_owned() }.to_string()
     );
 }
 
@@ -68,7 +68,7 @@ fn it_can_borrow() {
 
     assert_eq!(
         "Hello, World",
-        format!("{}", Test { name: "World" })
+        Test { name: "World" }.to_string()
     );
 }
 
@@ -80,7 +80,7 @@ fn it_performs_escaping() {
 
     assert_eq!(
         "&lt;&amp;&quot;&apos;",
-        format!("{}", Test { txt: "<&\"'" })
+        Test { txt: "<&\"'" }.to_string()
     );
 }
 
@@ -92,7 +92,7 @@ fn it_passes_through() {
 
     assert_eq!(
         "<&\"'",
-        format!("{}", Test { txt: "<&\"'" })
+        Test { txt: "<&\"'" }.to_string()
     );
 }
 
@@ -107,6 +107,6 @@ fn template_root_element() {
 
     assert_eq!(
         "Hello, World",
-        format!("{}", Test(Nested { name: "World" }))
+        Test(Nested { name: "World" }).to_string()
     );
 }

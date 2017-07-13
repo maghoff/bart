@@ -8,7 +8,7 @@ fn it_works() {
 
     assert_eq!(
         "(Hello, World)",
-        format!("{}", Test { name: "World".to_owned() })
+        Test { name: "World".to_owned() }.to_string()
     );
 }
 
@@ -22,7 +22,7 @@ fn it_defaults_to_the_current_dynamic_scope() {
 
     assert_eq!(
         "Hello, World",
-        format!("{}", Test { a: A { name: "World".to_owned() } })
+        Test { a: A { name: "World".to_owned() } }.to_string()
     );
 }
 
@@ -34,7 +34,7 @@ fn it_can_nest_within_iterator() {
 
     assert_eq!(
         "(1)\n(2)\n(3)\n",
-        format!("{}", Test { items: &[1, 2, 3] })
+        Test { items: &[1, 2, 3] }.to_string()
     );
 }
 
@@ -48,7 +48,7 @@ fn it_allows_named_root_scope() {
 
     assert_eq!(
         "(Hello, World)",
-        format!("{}", Test { person: Person { name: "World".to_owned() } })
+        Test { person: Person { name: "World".to_owned() } }.to_string()
     );
 }
 
@@ -60,6 +60,6 @@ fn it_finds_partials_relative_to_crate_root() {
 
     assert_eq!(
         "(Hello, World)",
-        format!("{}", Test { name: "World".to_owned() })
+        Test { name: "World".to_owned() }.to_string()
     );
 }

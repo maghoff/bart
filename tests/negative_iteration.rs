@@ -8,7 +8,7 @@ fn it_skips_some_option() {
 
     assert_eq!(
         "[]",
-        format!("{}", Test { x: Some(42) })
+        Test { x: Some(42) }.to_string()
     );
 }
 
@@ -20,7 +20,7 @@ fn it_includes_none_option() {
 
     assert_eq!(
         "[it]",
-        format!("{}", Test { x: None })
+        Test { x: None }.to_string()
     );
 }
 
@@ -32,7 +32,7 @@ fn it_supports_borrowed_option() {
 
     assert_eq!(
         "[it]",
-        format!("{}", Test { x: &None })
+        Test { x: &None }.to_string()
     );
 }
 
@@ -44,7 +44,7 @@ fn it_supports_multiply_borrowed_option() {
 
     assert_eq!(
         "[it]",
-        format!("{}", Test { x: &&&None })
+        Test { x: &&&None }.to_string()
     );
 }
 
@@ -56,7 +56,7 @@ fn it_skips_ok_result() {
 
     assert_eq!(
         "[]",
-        format!("{}", Test { x: &Ok(42) })
+        Test { x: &Ok(42) }.to_string()
     );
 }
 
@@ -68,6 +68,6 @@ fn it_yields_err_result() {
 
     assert_eq!(
         "[42]",
-        format!("{}", Test { x: &Err(42) })
+        Test { x: &Err(42) }.to_string()
     );
 }

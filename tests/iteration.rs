@@ -8,7 +8,7 @@ fn it_can_iterate() {
 
     assert_eq!(
         "123",
-        format!("{}", Test { vec: vec![1, 2, 3] })
+        Test { vec: vec![1, 2, 3] }.to_string()
     );
 }
 
@@ -20,12 +20,12 @@ fn it_can_iterate_option() {
 
     assert_eq!(
         "(1)",
-        format!("{}", Test { a: Some(1) })
+        Test { a: Some(1) }.to_string()
     );
 
     assert_eq!(
         "",
-        format!("{}", Test { a: None })
+        Test { a: None }.to_string()
     );
 }
 
@@ -37,6 +37,6 @@ fn it_can_iterate_borrowed_slice() {
 
     assert_eq!(
         "123",
-        format!("{}", Test { slice: &[1, 2, 3] })
+        Test { slice: &[1, 2, 3] }.to_string()
     );
 }
