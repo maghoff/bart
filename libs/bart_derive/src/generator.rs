@@ -23,7 +23,11 @@ fn resolve(name: &token::Name, scope_depth: u32) -> syn::Ident {
         },
     };
 
-    let full_name = itertools::chain(&[root.as_str()], &name.segments).join(".");
+    let mut full_name = itertools::chain(&[root.as_str()], &name.segments).join(".");
+
+    if name.function_call {
+        full_name.push_str("()");
+    }
 
     syn::Ident::new(full_name)
 }
@@ -109,5 +113,27 @@ pub fn generate(node: ast::Ast, scope_level: u32, partials_resolver: &mut Partia
                 }
             }
         },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use token::simple_name;
+    use scanner::name;
+
+    #[test]
+    fn resolves_top_level_names() {
+        assert_eq!(resolve(&simple_name("ape"), 3), syn::Ident::new("_s0.ape"));
+    }
+
+    #[test]
+    fn resolves_nested_names() {
+        assert_eq!(resolve(&name(".ape").unwrap().1, 3), syn::Ident::new("_s2.ape"));
+    }
+
+    #[test]
+    fn resolves_function_calls() {
+        assert_eq!(resolve(&name("ape()").unwrap().1, 3), syn::Ident::new("_s0.ape()"));
     }
 }

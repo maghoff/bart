@@ -2,6 +2,7 @@
 pub struct Name<'a> {
     pub leading_dots: u32,
     pub segments: Vec<&'a str>,
+    pub function_call: bool,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -37,5 +38,6 @@ pub fn simple_name(name: &'static str) -> Name<'static> {
     Name {
         leading_dots: 0,
         segments: vec![name],
+        function_call: false,
     }
 }

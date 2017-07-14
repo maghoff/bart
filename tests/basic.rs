@@ -110,3 +110,21 @@ fn template_root_element() {
         Test(Nested { name: "World" }).to_string()
     );
 }
+
+#[test]
+fn function_call() {
+    #[derive(BartDisplay)]
+    #[template_string="Hello, {{name()}}"]
+    struct Test;
+
+    impl Test {
+        fn name(&self) -> &'static str {
+            "World"
+        }
+    }
+
+    assert_eq!(
+        "Hello, World",
+        Test.to_string()
+    );
+}
