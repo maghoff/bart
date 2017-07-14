@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/maghoff/bart.svg?branch=master)](https://travis-ci.org/maghoff/bart)
+[![Build Status](https://travis-ci.org/maghoff/bart.svg?branch=v0.1.4)](https://travis-ci.org/maghoff/bart)
 
 Bart is a compile time templating language for [Rust](https://www.rust-lang.org/en-US/) inspired by [Mustache](https://mustache.github.io/mustache.5.html). It plays to Rust's strengths by statically compiling the template into efficient code and performing full variable resolution and type checking at compile time.
 

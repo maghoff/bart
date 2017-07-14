@@ -10,7 +10,7 @@ version = "0.1.4"
 readme = "README.md"
 
 [badges]
-travis-ci = { repository = "maghoff/bart", branch = "master" }
+travis-ci = { repository = "maghoff/bart", branch = "v0.1.4" }
 
 [dependencies]
 nom = "2.0.1"
