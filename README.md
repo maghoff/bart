@@ -7,8 +7,8 @@ Cargo dependencies
 To use Bart, add these dependencies to your `Cargo.toml`:
 
     [dependencies]
-    bart = "0.1.3"
-    bart_derive = "0.1.3"
+    bart = "0.1.4"
+    bart_derive = "0.1.4"
 
 Example
 =======

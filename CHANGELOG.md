@@ -2,8 +2,27 @@ Changelog
 =========
 This is a high-level overview of the changes that made it into a given version.
 
-Next version
-------------
+Version 0.1.4
+-------------
+New in this version:
+
+ * Added a function call syntax, to be able to work with trait objects
+
+        #[derive(BartDisplay)]
+        #[template_string="Hello, {{name()}}"]
+        struct Test;
+
+        impl Test {
+            fn name(&self) -> &'static str {
+                "World"
+            }
+        }
+
+        assert_eq!(
+            "Hello, World",
+            Test.to_string()
+        );
+
 Changed:
 
  * Fixed some clippy lints and disabled clippy for the generated code
