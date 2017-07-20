@@ -40,3 +40,25 @@ fn it_can_iterate_borrowed_slice() {
         Test { slice: &[1, 2, 3] }.to_string()
     );
 }
+
+#[test]
+fn it_can_iterate_function() {
+    #[derive(BartDisplay)]
+    #[template_string="{{#as_vec()}}{{.}}{{/as_vec()}}"]
+    struct Test {
+        a: i32,
+        b: i32,
+        c: i32,
+    }
+
+    impl Test {
+        pub fn as_vec(&self) -> Vec<i32> {
+            vec![self.a, self.b, self.c]
+        }
+    }
+
+    assert_eq!(
+        "123",
+        Test { a: 1, b: 2, c: 3 }.to_string()
+    );
+}
