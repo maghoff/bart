@@ -113,3 +113,26 @@ fn it_supports_conditional_scope_with_slice() {
         Test { a: &[] }.to_string()
     );
 }
+
+#[test]
+fn it_supports_conditional_scope_with_function() {
+    #[derive(BartDisplay)]
+    #[template_string="{{#gt()?}}yes{{/gt()}}"]
+    struct Test { a: i32 }
+
+    impl Test {
+        pub fn gt(&self) -> bool {
+            self.a > 10
+        }
+    }
+
+    assert_eq!(
+        "yes",
+        Test { a: 20 }.to_string()
+    );
+
+    assert_eq!(
+        "",
+        Test { a: 5 }.to_string()
+    );
+}
