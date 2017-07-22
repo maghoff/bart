@@ -62,3 +62,14 @@ fn it_can_iterate_function() {
         Test { a: 1, b: 2, c: 3 }.to_string()
     );
 }
+
+#[test]
+fn it_can_iterate_dot() {
+    #[derive(BartDisplay)]
+    #[template_string="{{#opt}}{{#.}}{{.}}{{/.}}{{/opt}}"]
+    struct Test { opt: Option<Vec<i32>> }
+    assert_eq!(
+        "123",
+        Test { opt: Some(vec![1, 2, 3]) }.to_string()
+    );
+}

@@ -101,7 +101,7 @@ fn section_opener<'a>(input: &'a str) -> Result<Token<'a>, Error> {
 
     let (input, tail) = if input.ends_with('?') {
         (&input[..input.len()-1], Tail::Conditional)
-    } else if input.ends_with('.') {
+    } else if input.ends_with('.') && input.len() > 1 {
         (&input[..input.len()-1], Tail::Scope)
     } else {
         (input, Tail::None)
