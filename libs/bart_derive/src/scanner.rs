@@ -263,6 +263,15 @@ mod tests {
     }
 
     #[test]
+    fn bart_tag_matches_iteration_section_opener_dot() {
+        assert_eq!(
+            Ok(("", Token::SectionOpener(SectionType::Iteration, name(".").unwrap().1))),
+            bart_tag("{{#.}}")
+        );
+    }
+
+
+    #[test]
     fn bart_tag_matches_negative_iteration_section_opener() {
         assert_eq!(
             Ok(("", Token::SectionOpener(SectionType::NegativeIteration, simple_name("ape")))),
