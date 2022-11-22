@@ -14,10 +14,12 @@ use ast::Ast;
 use proc_macro::TokenStream;
 use std::fs::File;
 use std::io::prelude::*;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 fn user_crate_root() -> PathBuf {
-    std::env::current_dir().expect("Unable to get current directory")
+    std::env::var("CARGO_MANIFEST_DIR")
+        .expect("Unable to get CARGO_MANIFEST_DIR")
+        .into()
 }
 
 fn find_attr<'a>(attrs: &'a Vec<syn::Attribute>, name: &str) -> Option<&'a str> {
@@ -30,12 +32,12 @@ fn find_attr<'a>(attrs: &'a Vec<syn::Attribute>, name: &str) -> Option<&'a str> 
         .map(|x| x.as_ref())
 }
 
-fn buf_file<P: AsRef<Path>>(filename: P) -> String {
-    let mut f = File::open(filename)
-        .expect("Unable to open file for reading");
+fn buf_file(filename: &PathBuf) -> String {
+    let mut f =
+        File::open(filename).expect(&format!("Unable to open file for reading: {:?}", filename));
     let mut buf = String::new();
     f.read_to_string(&mut buf)
-        .expect("Unable to read file");
+        .expect(&format!("Unable to read file: {:?}", filename));
 
     buf
 }
@@ -94,7 +96,7 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
                     let abs_filename = user_crate_root().join(filename);
                     dependencies.push(abs_filename.to_str().unwrap().to_owned());
                     let resolver = FilesystemPartialsResolver::new(abs_filename.parent().unwrap(), &mut dependencies);
-                    (buf_file(filename), Box::new(resolver))
+                    (buf_file(&abs_filename), Box::new(resolver))
                 },
                 None => {
                     let template = find_attr(&ast.attrs, "template_string")
