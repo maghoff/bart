@@ -33,7 +33,8 @@ fn find_attr<'a>(attrs: &'a Vec<syn::Attribute>, name: &str) -> Option<&'a str> 
 }
 
 fn buf_file<P: AsRef<Path>>(filename: P) -> String {
-    let mut f = File::open(filename).expect("Unable to open file for reading");
+    let mut f = File::open(filename)
+        .expect("Unable to open file for reading");
     let mut buf = String::new();
     f.read_to_string(&mut buf)
         .expect("Unable to read file");
