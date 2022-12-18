@@ -14,7 +14,7 @@ use ast::Ast;
 use proc_macro::TokenStream;
 use std::fs::File;
 use std::io::prelude::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 fn user_crate_root() -> PathBuf {
     std::env::var("CARGO_MANIFEST_DIR")
@@ -27,12 +27,12 @@ fn find_attr<'a>(attrs: &'a Vec<syn::Attribute>, name: &str) -> Option<&'a str> 
         .find(|&x| x.name() == name)
         .and_then(|ref attr| match &attr.value {
             &syn::MetaItem::NameValue(_, syn::Lit::Str(ref template, _)) => Some(template),
-            _ => None
+            _ => None,
         })
         .map(|x| x.as_ref())
 }
 
-fn buf_file(filename: &PathBuf) -> String {
+fn buf_file<P: AsRef<Path>>(filename: P) -> String {
     let mut f = File::open(filename).expect("Unable to open file for reading");
     let mut buf = String::new();
     f.read_to_string(&mut buf)
