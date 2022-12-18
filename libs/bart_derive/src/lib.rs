@@ -27,7 +27,7 @@ fn find_attr<'a>(attrs: &'a Vec<syn::Attribute>, name: &str) -> Option<&'a str> 
         .find(|&x| x.name() == name)
         .and_then(|ref attr| match &attr.value {
             &syn::MetaItem::NameValue(_, syn::Lit::Str(ref template, _)) => Some(template),
-            _ => None,
+            _ => None
         })
         .map(|x| x.as_ref())
 }
