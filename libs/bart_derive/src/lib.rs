@@ -17,7 +17,9 @@ use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 
 fn user_crate_root() -> PathBuf {
-    std::env::current_dir().expect("Unable to get current directory")
+    std::env::var("CARGO_MANIFEST_DIR")
+        .expect("Unable to get CARGO_MANIFEST_DIR")
+        .into()
 }
 
 fn find_attr<'a>(attrs: &'a Vec<syn::Attribute>, name: &str) -> Option<&'a str> {
@@ -94,7 +96,7 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
                     let abs_filename = user_crate_root().join(filename);
                     dependencies.push(abs_filename.to_str().unwrap().to_owned());
                     let resolver = FilesystemPartialsResolver::new(abs_filename.parent().unwrap(), &mut dependencies);
-                    (buf_file(filename), Box::new(resolver))
+                    (buf_file(&abs_filename), Box::new(resolver))
                 },
                 None => {
                     let template = find_attr(&ast.attrs, "template_string")
