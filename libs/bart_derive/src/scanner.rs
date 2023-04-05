@@ -101,7 +101,7 @@ fn section_opener<'a>(input: &'a str) -> Result<Token<'a>, Error> {
 
     let (input, tail) = if input.ends_with('?') {
         (&input[..input.len()-1], Tail::Conditional)
-    } else if input.ends_with('.') {
+    } else if input.ends_with('.') && input.len() > 1 {
         (&input[..input.len()-1], Tail::Scope)
     } else {
         (input, Tail::None)
@@ -261,6 +261,15 @@ mod tests {
             bart_tag("{{#ape}}")
         );
     }
+
+    #[test]
+    fn bart_tag_matches_iteration_section_opener_dot() {
+        assert_eq!(
+            Ok(("", Token::SectionOpener(SectionType::Iteration, name(".").unwrap().1))),
+            bart_tag("{{#.}}")
+        );
+    }
+
 
     #[test]
     fn bart_tag_matches_negative_iteration_section_opener() {
