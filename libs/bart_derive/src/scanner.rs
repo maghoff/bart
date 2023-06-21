@@ -46,10 +46,10 @@ pub fn name<'a>(input: &'a str) -> Result<(&'a str, Name<'a>), Error> {
     let input = input.trim();
 
     let leading_dots = input.find(not_dot).unwrap_or(input.len());
-    let input = input[leading_dots..].trim_left();
+    let input = input[leading_dots..].trim_start();
 
     let (function_call, input) = match input.ends_with("()") {
-        true => (true, input[..input.len() - 2].trim_right()),
+        true => (true, input[..input.len() - 2].trim_end()),
         false => (false, input),
     };
 
