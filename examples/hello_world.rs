@@ -1,7 +1,4 @@
-#[macro_use]
-extern crate bart_derive;
-
-#[derive(BartDisplay)]
+#[derive(bart_derive::BartDisplay)]
 #[template = "examples/hello_world.html"]
 struct HelloWorld<'a> {
     name: &'a str,

@@ -1,5 +1,4 @@
-#[macro_use]
-extern crate bart_derive;
+use bart_derive::BartDisplay;
 
 #[test]
 fn it_skips_some_option() {

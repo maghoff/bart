@@ -28,21 +28,17 @@ Given the template file `hello_world.html`:
 Hello {{name}}
 ```
 
-We can write the following program:
+We can write the following:
 
 ```
-#[macro_use] extern crate bart_derive;
-
-#[derive(BartDisplay)]
+#[derive(bart_derive::BartDisplay)]
 #[template = "examples/hello_world.html"]
 struct HelloWorld<'a> {
     name: &'a str,
 }
 
-fn main() {
-    print!("{}", &HelloWorld { name: "World" });
-#   assert_eq!("Hello World\n", format!("{}", &HelloWorld { name: "World" }));
-}
+print!("{}", &HelloWorld { name: "World" });
+# assert_eq!("Hello World\n", format!("{}", &HelloWorld { name: "World" }));
 ```
 
 To compile this example program, you need to add both `bart` and `bart_derive` as dependencies in your `Cargo.toml`.
@@ -58,16 +54,12 @@ You can run this example by cloning this repository and executing `cargo run --e
 Line by line
 ------------
 ```ignore
-#[macro_use] extern crate bart_derive;
+#[derive(bart_derive::BartDisplay)]
 ```
 
-The programmer interface to Bart is the procedural macro defined in the `bart_derive` crate, which implements support for `#[derive(BartDisplay)]`. It must be added as a dependency in your `Cargo.toml` and referenced like above. `bart_derive` generates code which is dependent on the `bart` crate, so you also need to pull this in as a dependency.
+The programmer interface to Bart is the procedural macro defined in the `bart_derive` crate, which implements support for `#[derive(bart_derive::BartDisplay)]`. It must be added as a dependency in your `Cargo.toml`. `bart_derive` generates code which is dependent on the `bart` crate, so you also need to pull this in as a dependency.
 
-```ignore
-#[derive(BartDisplay)]
-```
-
-Use `bart_derive` to generate an `impl` of the [`Display`][Display] trait based on the template and struct below.
+Use `bart_derive::BartDisplay` to generate an `impl` of the [`Display`][Display] trait based on the template and struct below.
 
 ```ignore
 #[template = "hello_world.html"]
@@ -103,8 +95,7 @@ interpolation](#verbatim-interpolation), &hellip;
 Interpolation
 -------------
 ```
-# #[macro_use] extern crate bart_derive;
-# #[derive(BartDisplay)]
+# #[derive(bart_derive::BartDisplay)]
 # #[template_string = "\
 Hello {{name}}
 # "]
@@ -126,8 +117,7 @@ Interpolations are HTML escaped, so it is safe to include user input this way.
 Verbatim interpolation
 ----------------------
 ```
-# #[macro_use] extern crate bart_derive;
-# #[derive(BartDisplay)]
+# #[derive(bart_derive::BartDisplay)]
 # #[template_string = "\
 Hello {{{name}}}
 # "]
@@ -150,22 +140,18 @@ HTML content that is otherwise known to be safe.
 It can be valuable to use verbatim interpolation to include other Bart
 templates.
 
-
 */
 
 #![cfg_attr(feature = "specialization", feature(specialization))]
 
-extern crate nom;
-
+mod conditional;
 mod display_html_safe;
+mod negative_iterator;
 
 // With specialization, DisplayHtmlSafe could be something that the
 // user wants to deal with. But specialization is still unstable.
 #[doc(hidden)]
 pub use display_html_safe::DisplayHtmlSafe;
 
-mod conditional;
 pub use conditional::Conditional;
-
-mod negative_iterator;
 pub use negative_iterator::NegativeIterator;

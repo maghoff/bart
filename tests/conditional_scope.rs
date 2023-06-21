@@ -1,5 +1,4 @@
-#[macro_use]
-extern crate bart_derive;
+use bart_derive::BartDisplay;
 
 #[test]
 fn it_supports_conditional_scope_with_boolean() {
@@ -29,8 +28,6 @@ fn it_supports_negative_conditional_scope_with_boolean() {
 
 #[test]
 fn it_supports_conditional_scope_with_non_bool() {
-    extern crate bart;
-
     struct TestBool<'a> {
         name: &'a str,
     }

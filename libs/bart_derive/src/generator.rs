@@ -1,7 +1,7 @@
 use crate::ast;
 use crate::token;
 use itertools;
-use quote;
+use quote::*;
 use syn;
 
 pub trait PartialsResolver {

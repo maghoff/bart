@@ -7,7 +7,7 @@ struct EscapingWriter<'a> {
 
 impl<'a> EscapingWriter<'a> {
     fn new(inner: &'a mut dyn Write) -> EscapingWriter<'a> {
-        EscapingWriter { inner: inner }
+        EscapingWriter { inner }
     }
 }
 

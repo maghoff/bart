@@ -1,10 +1,3 @@
-#[macro_use]
-extern crate quote;
-
-extern crate itertools;
-extern crate proc_macro;
-extern crate syn;
-
 mod ast;
 mod generator;
 mod parser;
@@ -13,6 +6,7 @@ mod token;
 
 use ast::Ast;
 use proc_macro::TokenStream;
+use quote::*;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};

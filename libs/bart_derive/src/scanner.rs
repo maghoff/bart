@@ -1,6 +1,3 @@
-extern crate num;
-extern crate syn;
-
 use crate::token::*;
 
 const TAG_OPENER: &'static str = "{{";

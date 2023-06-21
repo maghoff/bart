@@ -18,9 +18,7 @@ Given the template file `hello_world.html`:
 
 We can write the following program:
 
-    #[macro_use] extern crate bart_derive;
-
-    #[derive(BartDisplay)]
+    #[derive(bart_derive::BartDisplay)]
     #[template = "hello_world.html"]
     struct HelloWorld<'a> {
         name: &'a str,
@@ -40,13 +38,11 @@ You can run this example by cloning this repository and executing `cargo run --e
 
 Line by line
 ------------
-    #[macro_use] extern crate bart_derive;
-
-The programmer interface to Bart is the procedural macro defined in the `bart_derive` crate, which implements support for `#[derive(BartDisplay)]`. It must be added as a dependency in your `Cargo.toml` and referenced like above. `bart_derive` generates code which is dependent on the `bart` crate, so you also need to pull this in as a dependency.
-
     #[derive(BartDisplay)]
 
-Use `bart_derive` to generate an `impl` of the [`Display`][Display] trait based on the template and struct below.
+The programmer interface to Bart is the procedural macro defined in the `bart_derive` crate, which implements support for `#[derive(bart_derive::BartDisplay)]`. It must be added as a dependency in your `Cargo.toml`. `bart_derive` generates code which is dependent on the `bart` crate, so you also need to pull this in as a dependency.
+
+Use `bart_derive::BartDisplay` to generate an `impl` of the [`Display`][Display] trait based on the template and struct below.
 
     #[template = "hello_world.html"]
 
