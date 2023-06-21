@@ -2,6 +2,19 @@ Changelog
 =========
 This is a high-level overview of the changes that made it into a given version.
 
+Version 0.1.6
+-------------
+ * Upgrade to syn 0.11.1. Version 0.10.5, which was previously used, has been yanked. This
+   makes Bart usable again.
+
+Version 0.1.5
+-------------
+Fixed in this version:
+
+ * Resolve template paths relative to the environmental variable `CARGO_MANIFEST_DIR`, which
+   can be different from the current working directory (which was used earlier) in cargo
+   workspaces. This fixes Bart for use in cargo workspaces.
+
 Version 0.1.4
 -------------
 New in this version:
