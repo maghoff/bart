@@ -87,8 +87,8 @@ fn unescaped_interpolation<'a>(input: &'a str) -> Result<Token<'a>, Error> {
 }
 
 fn section_opener<'a>(input: &'a str) -> Result<Token<'a>, Error> {
-    enum Head { Positive, Negative };
-    enum Tail { Conditional, Scope, None };
+    enum Head { Positive, Negative }
+    enum Tail { Conditional, Scope, None }
 
     let input = input.trim();
 

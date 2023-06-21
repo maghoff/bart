@@ -2,11 +2,11 @@ use nom::*;
 use std::fmt::{self, Display, Write};
 
 struct EscapingWriter<'a> {
-    inner: &'a mut Write
+    inner: &'a mut dyn Write
 }
 
 impl<'a> EscapingWriter<'a> {
-    fn new(inner: &'a mut Write) -> EscapingWriter<'a> {
+    fn new(inner: &'a mut dyn Write) -> EscapingWriter<'a> {
         EscapingWriter { inner: inner }
     }
 }
@@ -34,7 +34,7 @@ impl<'a> Write for EscapingWriter<'a> {
 }
 
 pub trait DisplayHtmlSafe {
-    fn safe_fmt(&self, &mut fmt::Formatter) -> fmt::Result;
+    fn safe_fmt(&self, _: &mut fmt::Formatter) -> fmt::Result;
 }
 
 impl<T: Display> DisplayHtmlSafe for T {

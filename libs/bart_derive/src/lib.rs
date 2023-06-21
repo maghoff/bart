@@ -90,7 +90,7 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
     let mut dependencies = Vec::<String>::new();
 
     let generated = {
-        let (template, mut partials_resolver): (_, Box<generator::PartialsResolver>) =
+        let (template, mut partials_resolver): (_, Box<dyn generator::PartialsResolver>) =
             match find_attr(&ast.attrs, "template") {
                 Some(filename) => {
                     let abs_filename = user_crate_root().join(filename);

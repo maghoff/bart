@@ -17,7 +17,7 @@ fn resolve(name: &token::Name, scope_depth: u32) -> syn::Ident {
             let level = scope_depth
                 .checked_sub(x)
                 .unwrap_or_else(|| {
-                    panic!(format!("Too many leading dots ({}) in scope depth of only {}", x, scope_depth));
+                    panic!("Too many leading dots ({}) in scope depth of only {}", x, scope_depth);
                 });
             format!("_s{}", level)
         },
@@ -32,7 +32,7 @@ fn resolve(name: &token::Name, scope_depth: u32) -> syn::Ident {
     syn::Ident::new(full_name)
 }
 
-fn scope(name: token::Name, scope_level: u32, ast: ast::Ast, partials_resolver: &mut PartialsResolver)
+fn scope(name: token::Name, scope_level: u32, ast: ast::Ast, partials_resolver: &mut dyn PartialsResolver)
     -> (syn::Ident, syn::Ident, quote::Tokens)
 {
     let name = resolve(&name, scope_level);
@@ -42,7 +42,7 @@ fn scope(name: token::Name, scope_level: u32, ast: ast::Ast, partials_resolver: 
     (name, scope_variable, nested_generated)
 }
 
-pub fn generate(node: ast::Ast, scope_level: u32, partials_resolver: &mut PartialsResolver) -> quote::Tokens {
+pub fn generate(node: ast::Ast, scope_level: u32, partials_resolver: &mut dyn PartialsResolver) -> quote::Tokens {
     use ast::Ast::*;
     match node {
         Sequence(seq) => {
