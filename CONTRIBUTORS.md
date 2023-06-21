@@ -6,6 +6,7 @@ New contributors in master
 --------------------------
  - Hunter Praska (hunter@wiggin-labs.com)
  - Ryo Hirayama
+ - Jordan Miner (jminer7@gmail.com)
 
 Originally developed by
 -----------------------
