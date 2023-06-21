@@ -1,4 +1,5 @@
-#[macro_use] extern crate bart_derive;
+#[macro_use]
+extern crate bart_derive;
 
 #[derive(BartDisplay)]
 #[template = "examples/hello_world.html"]

@@ -9,7 +9,7 @@ const UNESCAPED_TAG_CLOSER: &'static str = "}}}";
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
-    Mismatch
+    Mismatch,
 }
 
 fn consume<'a>(input: &'a str, expected: &str) -> Result<&'a str, Error> {
@@ -25,7 +25,8 @@ fn not_dot(ch: char) -> bool {
 
 pub fn segmented_name<'a>(input: &'a str) -> Result<Vec<&'a str>, Error> {
     if input.len() > 0 {
-        input.split('.')
+        input
+            .split('.')
             .map(|segment| {
                 let ident = syn::parse_ident(segment);
                 let number = segment.parse::<u32>();
@@ -59,11 +60,14 @@ pub fn name<'a>(input: &'a str) -> Result<(&'a str, Name<'a>), Error> {
 
     let segments = segmented_name(input)?;
 
-    Ok((&input[0..0], Name {
-        leading_dots: num::cast::cast(leading_dots).unwrap(),
-        segments: segments,
-        function_call
-    }))
+    Ok((
+        &input[0..0],
+        Name {
+            leading_dots: num::cast::cast(leading_dots).unwrap(),
+            segments: segments,
+            function_call,
+        },
+    ))
 }
 
 fn at_end(input: &str) -> Result<(), Error> {
@@ -87,8 +91,15 @@ fn unescaped_interpolation<'a>(input: &'a str) -> Result<Token<'a>, Error> {
 }
 
 fn section_opener<'a>(input: &'a str) -> Result<Token<'a>, Error> {
-    enum Head { Positive, Negative }
-    enum Tail { Conditional, Scope, None }
+    enum Head {
+        Positive,
+        Negative,
+    }
+    enum Tail {
+        Conditional,
+        Scope,
+        None,
+    }
 
     let input = input.trim();
 
@@ -100,9 +111,9 @@ fn section_opener<'a>(input: &'a str) -> Result<Token<'a>, Error> {
     let input = &input[1..];
 
     let (input, tail) = if input.ends_with('?') {
-        (&input[..input.len()-1], Tail::Conditional)
+        (&input[..input.len() - 1], Tail::Conditional)
     } else if input.ends_with('.') {
-        (&input[..input.len()-1], Tail::Scope)
+        (&input[..input.len() - 1], Tail::Scope)
     } else {
         (input, Tail::None)
     };
@@ -131,11 +142,18 @@ fn section_closer<'a>(input: &'a str) -> Result<Token<'a>, Error> {
 }
 
 fn partial_include<'a>(input: &'a str) -> Result<Token<'a>, Error> {
-    let inner = consume(input, ">")?.trim().splitn(2, ' ').collect::<Vec<_>>();
+    let inner = consume(input, ">")?
+        .trim()
+        .splitn(2, ' ')
+        .collect::<Vec<_>>();
     let partial_name = inner[0];
     let segments = match inner.get(1) {
         Some(root) => name(root)?.1,
-        None => Name { leading_dots: 1, segments: vec![], function_call: false },
+        None => Name {
+            leading_dots: 1,
+            segments: vec![],
+            function_call: false,
+        },
     };
 
     Ok(Token::PartialInclude(partial_name, segments))
@@ -170,17 +188,14 @@ fn bart_tag<'a>(input: &'a str) -> Result<(&'a str, Token<'a>), Error> {
 fn literal_text<'a>(input: &'a str) -> Result<(&'a str, Option<Token<'a>>), Error> {
     match input.find(TAG_OPENER) {
         Some(0) => Ok((input, None)),
-        Some(index) => Ok((
-            &input[index..],
-            Some(Token::Literal(&input[0..index]))
-        )),
+        Some(index) => Ok((&input[index..], Some(Token::Literal(&input[0..index])))),
         None => Ok((
             "",
             match input.len() {
                 0 => None,
-                _ => Some(Token::Literal(input))
-            }
-        ))
+                _ => Some(Token::Literal(input)),
+            },
+        )),
     }
 }
 
@@ -209,8 +224,8 @@ pub fn sequence<'a>(mut input: &'a str) -> Result<Vec<Token<'a>>, Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::Token::*;
+    use super::*;
 
     #[test]
     fn consume_matches() {
@@ -240,24 +255,21 @@ mod tests {
 
     #[test]
     fn bart_tag_mismatches() {
-        assert_eq!(
-            Err(Error::Mismatch),
-            bart_tag("head{{ape}}")
-        );
+        assert_eq!(Err(Error::Mismatch), bart_tag("head{{ape}}"));
     }
 
     #[test]
     fn bart_tag_must_be_closed() {
-        assert_eq!(
-            Err(Error::Mismatch),
-            bart_tag("{{ape")
-        );
+        assert_eq!(Err(Error::Mismatch), bart_tag("{{ape"));
     }
 
     #[test]
     fn bart_tag_matches_iteration_section_opener() {
         assert_eq!(
-            Ok(("", Token::SectionOpener(SectionType::Iteration, simple_name("ape")))),
+            Ok((
+                "",
+                Token::SectionOpener(SectionType::Iteration, simple_name("ape"))
+            )),
             bart_tag("{{#ape}}")
         );
     }
@@ -265,7 +277,10 @@ mod tests {
     #[test]
     fn bart_tag_matches_negative_iteration_section_opener() {
         assert_eq!(
-            Ok(("", Token::SectionOpener(SectionType::NegativeIteration, simple_name("ape")))),
+            Ok((
+                "",
+                Token::SectionOpener(SectionType::NegativeIteration, simple_name("ape"))
+            )),
             bart_tag("{{^ape}}")
         );
     }
@@ -273,7 +288,10 @@ mod tests {
     #[test]
     fn bart_tag_matches_conditional_section_opener() {
         assert_eq!(
-            Ok(("", Token::SectionOpener(SectionType::Conditional, simple_name("ape")))),
+            Ok((
+                "",
+                Token::SectionOpener(SectionType::Conditional, simple_name("ape"))
+            )),
             bart_tag("{{#ape?}}")
         );
     }
@@ -281,7 +299,10 @@ mod tests {
     #[test]
     fn bart_tag_matches_negative_conditional_section_opener() {
         assert_eq!(
-            Ok(("", Token::SectionOpener(SectionType::NegativeConditional, simple_name("ape")))),
+            Ok((
+                "",
+                Token::SectionOpener(SectionType::NegativeConditional, simple_name("ape"))
+            )),
             bart_tag("{{^ape?}}")
         );
     }
@@ -289,7 +310,10 @@ mod tests {
     #[test]
     fn bart_tag_matches_scope_section_opener() {
         assert_eq!(
-            Ok(("", Token::SectionOpener(SectionType::Scope, simple_name("ape")))),
+            Ok((
+                "",
+                Token::SectionOpener(SectionType::Scope, simple_name("ape"))
+            )),
             bart_tag("{{#ape.}}")
         );
     }
@@ -305,7 +329,17 @@ mod tests {
     #[test]
     fn bart_tag_matches_partial_include() {
         assert_eq!(
-            Ok(("", Token::PartialInclude("ape", Name { leading_dots: 1, segments: vec![], function_call: false }))),
+            Ok((
+                "",
+                Token::PartialInclude(
+                    "ape",
+                    Name {
+                        leading_dots: 1,
+                        segments: vec![],
+                        function_call: false
+                    }
+                )
+            )),
             bart_tag("{{>ape}}")
         );
     }
@@ -348,69 +382,106 @@ mod tests {
 
     #[test]
     fn literal_returns_none_at_tag() {
-        assert_eq!(
-            Ok(("{{ape}}", None)),
-            literal_text("{{ape}}")
-        );
+        assert_eq!(Ok(("{{ape}}", None)), literal_text("{{ape}}"));
     }
 
     #[test]
     fn literal_returns_none_at_end() {
-        assert_eq!(
-            Ok(("", None)),
-            literal_text("")
-        );
+        assert_eq!(Ok(("", None)), literal_text(""));
     }
 
     #[test]
     fn template_with_tightly_packed_tags() {
         let parsed = sequence("{{a}}{{b}}{{c}}").unwrap();
-        assert_eq!(vec![
-            Interpolation(simple_name("a")),
-            Interpolation(simple_name("b")),
-            Interpolation(simple_name("c")),
-        ], parsed);
+        assert_eq!(
+            vec![
+                Interpolation(simple_name("a")),
+                Interpolation(simple_name("b")),
+                Interpolation(simple_name("c")),
+            ],
+            parsed
+        );
     }
 
     #[test]
     fn template_with_mixed_content() {
         let parsed = sequence("Hello {{name}}! {{#list}}Welcome{{/list}}").unwrap();
-        assert_eq!(vec![
-            Literal("Hello "),
-            Interpolation(simple_name("name")),
-            Literal("! "),
-            SectionOpener(SectionType::Iteration, simple_name("list")),
-            Literal("Welcome"),
-            SectionCloser(simple_name("list")),
-        ], parsed);
+        assert_eq!(
+            vec![
+                Literal("Hello "),
+                Interpolation(simple_name("name")),
+                Literal("! "),
+                SectionOpener(SectionType::Iteration, simple_name("list")),
+                Literal("Welcome"),
+                SectionCloser(simple_name("list")),
+            ],
+            parsed
+        );
     }
 
     #[test]
     fn tags_with_leading_dots() {
         let parsed = sequence("{{.a}}{{..b}}{{...c}}").unwrap();
-        assert_eq!(vec![
-            Interpolation(Name { leading_dots: 1, segments: vec!["a"], function_call: false }),
-            Interpolation(Name { leading_dots: 2, segments: vec!["b"], function_call: false }),
-            Interpolation(Name { leading_dots: 3, segments: vec!["c"], function_call: false }),
-        ], parsed);
+        assert_eq!(
+            vec![
+                Interpolation(Name {
+                    leading_dots: 1,
+                    segments: vec!["a"],
+                    function_call: false
+                }),
+                Interpolation(Name {
+                    leading_dots: 2,
+                    segments: vec!["b"],
+                    function_call: false
+                }),
+                Interpolation(Name {
+                    leading_dots: 3,
+                    segments: vec!["c"],
+                    function_call: false
+                }),
+            ],
+            parsed
+        );
     }
 
     #[test]
     fn tags_with_segmented_names() {
         let parsed = sequence("{{a.b.c}}{{..b.c.d}}").unwrap();
-        assert_eq!(vec![
-            Interpolation(Name { leading_dots: 0, segments: vec!["a", "b", "c"], function_call: false }),
-            Interpolation(Name { leading_dots: 2, segments: vec!["b", "c", "d"], function_call: false }),
-        ], parsed);
+        assert_eq!(
+            vec![
+                Interpolation(Name {
+                    leading_dots: 0,
+                    segments: vec!["a", "b", "c"],
+                    function_call: false
+                }),
+                Interpolation(Name {
+                    leading_dots: 2,
+                    segments: vec!["b", "c", "d"],
+                    function_call: false
+                }),
+            ],
+            parsed
+        );
     }
 
     #[test]
     fn tags_with_segmentless_name() {
         let parsed = sequence("{{.}}{{..}}").unwrap();
-        assert_eq!(vec![
-            Interpolation(Name { leading_dots: 1, segments: vec![], function_call: false }),
-            Interpolation(Name { leading_dots: 2, segments: vec![], function_call: false }),
-        ], parsed);
+        assert_eq!(
+            vec![
+                Interpolation(Name {
+                    leading_dots: 1,
+                    segments: vec![],
+                    function_call: false
+                }),
+                Interpolation(Name {
+                    leading_dots: 2,
+                    segments: vec![],
+                    function_call: false
+                }),
+            ],
+            parsed
+        );
     }
 
     #[test]
@@ -453,17 +524,47 @@ mod tests {
 
     #[test]
     fn name_with_leading_dots() {
-        assert_eq!(Ok(("", Name { leading_dots: 1, segments: vec!["ape"], function_call: false })), name(".ape"));
+        assert_eq!(
+            Ok((
+                "",
+                Name {
+                    leading_dots: 1,
+                    segments: vec!["ape"],
+                    function_call: false
+                }
+            )),
+            name(".ape")
+        );
     }
 
     #[test]
     fn name_with_multiple_segments() {
-        assert_eq!(Ok(("", Name { leading_dots: 0, segments: vec!["ape", "2", "skrekk"], function_call: false })), name("ape.2.skrekk"));
+        assert_eq!(
+            Ok((
+                "",
+                Name {
+                    leading_dots: 0,
+                    segments: vec!["ape", "2", "skrekk"],
+                    function_call: false
+                }
+            )),
+            name("ape.2.skrekk")
+        );
     }
 
     #[test]
     fn name_without_any_segments() {
-        assert_eq!(Ok(("", Name { leading_dots: 1, segments: vec![], function_call: false })), name("."));
+        assert_eq!(
+            Ok((
+                "",
+                Name {
+                    leading_dots: 1,
+                    segments: vec![],
+                    function_call: false
+                }
+            )),
+            name(".")
+        );
     }
 
     #[test]
@@ -473,11 +574,31 @@ mod tests {
 
     #[test]
     fn function_call_name() {
-        assert_eq!(Ok(("", Name { leading_dots: 0, segments: vec!["fun"], function_call: true })), name("fun()"));
+        assert_eq!(
+            Ok((
+                "",
+                Name {
+                    leading_dots: 0,
+                    segments: vec!["fun"],
+                    function_call: true
+                }
+            )),
+            name("fun()")
+        );
     }
 
     #[test]
     fn function_call_name_with_whitespace() {
-        assert_eq!(Ok(("", Name { leading_dots: 0, segments: vec!["fun"], function_call: true })), name("fun () "));
+        assert_eq!(
+            Ok((
+                "",
+                Name {
+                    leading_dots: 0,
+                    segments: vec!["fun"],
+                    function_call: true
+                }
+            )),
+            name("fun () ")
+        );
     }
 }

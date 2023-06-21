@@ -2,7 +2,7 @@ use std::iter::*;
 
 pub trait NegativeIterator {
     type Item;
-    type IntoIter : Iterator;
+    type IntoIter: Iterator;
 
     fn neg_iter(&self) -> Self::IntoIter;
 }
@@ -14,8 +14,9 @@ impl<T> NegativeIterator for Option<T> {
     fn neg_iter(&self) -> Self::IntoIter {
         match *self {
             Some(_) => None,
-            None => Some(())
-        }.into_iter()
+            None => Some(()),
+        }
+        .into_iter()
     }
 }
 
@@ -26,15 +27,16 @@ impl<'a, T, E> NegativeIterator for &'a Result<T, E> {
     fn neg_iter(&self) -> Self::IntoIter {
         match **self {
             Ok(_) => None,
-            Err(ref err) => Some(err)
-        }.into_iter()
+            Err(ref err) => Some(err),
+        }
+        .into_iter()
     }
 }
 
 impl<'a, T, I, II> NegativeIterator for &'a T
 where
     II: Iterator,
-    T: NegativeIterator<Item=I, IntoIter=II>,
+    T: NegativeIterator<Item = I, IntoIter = II>,
 {
     type Item = I;
     type IntoIter = II;

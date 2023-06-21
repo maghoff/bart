@@ -1,4 +1,5 @@
-#[macro_use] extern crate quote;
+#[macro_use]
+extern crate quote;
 
 extern crate itertools;
 extern crate proc_macro;
@@ -23,21 +24,20 @@ fn user_crate_root() -> PathBuf {
 }
 
 fn find_attr<'a>(attrs: &'a Vec<syn::Attribute>, name: &str) -> Option<&'a str> {
-    attrs.iter()
+    attrs
+        .iter()
         .find(|&x| x.name() == name)
         .and_then(|ref attr| match &attr.value {
             &syn::MetaItem::NameValue(_, syn::Lit::Str(ref template, _)) => Some(template),
-            _ => None
+            _ => None,
         })
         .map(|x| x.as_ref())
 }
 
 fn buf_file<P: AsRef<Path>>(filename: P) -> String {
-    let mut f = File::open(filename)
-        .expect("Unable to open file for reading");
+    let mut f = File::open(filename).expect("Unable to open file for reading");
     let mut buf = String::new();
-    f.read_to_string(&mut buf)
-        .expect("Unable to read file");
+    f.read_to_string(&mut buf).expect("Unable to read file");
 
     buf
 }
@@ -59,7 +59,10 @@ struct FilesystemPartialsResolver<'a> {
 }
 
 impl<'a> FilesystemPartialsResolver<'a> {
-    fn new<T: Into<PathBuf>>(base_dir: T, dependencies: &mut Vec<String>) -> FilesystemPartialsResolver {
+    fn new<T: Into<PathBuf>>(
+        base_dir: T,
+        dependencies: &mut Vec<String>,
+    ) -> FilesystemPartialsResolver {
         FilesystemPartialsResolver {
             base_dir: base_dir.into(),
             dependencies,
@@ -74,10 +77,12 @@ impl<'a> generator::PartialsResolver for FilesystemPartialsResolver<'a> {
             true => user_crate_root().join(relative_path.strip_prefix("/").unwrap()),
             false => self.base_dir.join(partial_name),
         };
-        self.dependencies.push(abs_path.to_str().unwrap().to_owned());
+        self.dependencies
+            .push(abs_path.to_str().unwrap().to_owned());
         let template = buf_file(&abs_path);
         let parsed = parse_str(&template).unwrap();
-        let nested_resolver = &mut FilesystemPartialsResolver::new(abs_path.parent().unwrap(), self.dependencies);
+        let nested_resolver =
+            &mut FilesystemPartialsResolver::new(abs_path.parent().unwrap(), self.dependencies);
         generator::generate(parsed, 1, nested_resolver)
     }
 }
@@ -95,14 +100,19 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
                 Some(filename) => {
                     let abs_filename = user_crate_root().join(filename);
                     dependencies.push(abs_filename.to_str().unwrap().to_owned());
-                    let resolver = FilesystemPartialsResolver::new(abs_filename.parent().unwrap(), &mut dependencies);
+                    let resolver = FilesystemPartialsResolver::new(
+                        abs_filename.parent().unwrap(),
+                        &mut dependencies,
+                    );
                     (buf_file(&abs_filename), Box::new(resolver))
-                },
+                }
                 None => {
                     let template = find_attr(&ast.attrs, "template_string")
                         .map(|x| x.to_owned())
-                        .expect("#[derive(BartDisplay)] requires #[template = \"(filename)\"] \
-                            or  #[template_string = \"...\"]");
+                        .expect(
+                            "#[derive(BartDisplay)] requires #[template = \"(filename)\"] \
+                            or  #[template_string = \"...\"]",
+                        );
                     (template, Box::new(InlinePartialsResolver))
                 }
             };
@@ -111,10 +121,12 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
         generator::generate(parsed, 1, &mut *partials_resolver)
     };
 
-    let template_root = syn::Ident::new(find_attr(&ast.attrs, "template_root")
-        .map(|x| scanner::segmented_name(&x).expect("Syntax error in template_root"))
-        .map(|x| format!("self.{}", x.join(".")))
-        .unwrap_or("self".to_owned()));
+    let template_root = syn::Ident::new(
+        find_attr(&ast.attrs, "template_root")
+            .map(|x| scanner::segmented_name(&x).expect("Syntax error in template_root"))
+            .map(|x| format!("self.{}", x.join(".")))
+            .unwrap_or("self".to_owned()),
+    );
 
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();

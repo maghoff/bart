@@ -2,7 +2,7 @@ use nom::*;
 use std::fmt::{self, Display, Write};
 
 struct EscapingWriter<'a> {
-    inner: &'a mut dyn Write
+    inner: &'a mut dyn Write,
 }
 
 impl<'a> EscapingWriter<'a> {
@@ -59,7 +59,7 @@ macro_rules! display_is_html_safe {
                 Display::fmt(&self, f)
             }
         }
-    }
+    };
 }
 
 display_is_html_safe!(u8);
@@ -82,7 +82,9 @@ display_is_html_safe!(bool);
 mod test {
     use super::*;
 
-    struct Fake<'a> { text: &'a str }
+    struct Fake<'a> {
+        text: &'a str,
+    }
     impl<'a> Display for Fake<'a> {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             self.text.safe_fmt(f)
@@ -93,7 +95,12 @@ mod test {
     fn it_works() {
         assert_eq!(
             " &lt; &amp; text &quot; &apos; ",
-            format!("{}", Fake { text: " < & text \" ' " })
+            format!(
+                "{}",
+                Fake {
+                    text: " < & text \" ' "
+                }
+            )
         );
     }
 
