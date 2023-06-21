@@ -1,4 +1,4 @@
-use token;
+use crate::token;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Ast<'a> {

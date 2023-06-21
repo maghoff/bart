@@ -6,6 +6,7 @@ license = "MIT"
 name = "bart_derive"
 repository = "https://github.com/maghoff/bart"
 version = "0.1.5"
+edition = "2021"
 
 [dependencies]
 quote = "0.3.10"

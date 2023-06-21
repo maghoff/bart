@@ -1,7 +1,7 @@
 extern crate num;
 extern crate syn;
 
-use token::*;
+use crate::token::*;
 
 const TAG_OPENER: &'static str = "{{";
 const TAG_CLOSER: &'static str = "}}";

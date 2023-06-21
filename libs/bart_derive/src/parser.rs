@@ -1,6 +1,6 @@
-use ast::Ast;
+use crate::ast::Ast;
 use std::iter::*;
-use token::*;
+use crate::token::*;
 
 #[derive(Debug)]
 pub enum Error<'a> {

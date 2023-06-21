@@ -1,7 +1,7 @@
-use ast;
+use crate::ast;
 use itertools;
 use syn;
-use token;
+use crate::token;
 use quote;
 
 pub trait PartialsResolver {
@@ -120,7 +120,7 @@ pub fn generate(node: ast::Ast, scope_level: u32, partials_resolver: &mut dyn Pa
 mod tests {
     use super::*;
     use token::simple_name;
-    use scanner::name;
+    use crate::scanner::name;
 
     #[test]
     fn resolves_top_level_names() {
