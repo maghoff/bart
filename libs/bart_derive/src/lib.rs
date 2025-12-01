@@ -36,7 +36,7 @@ fn buf_file<P: AsRef<Path>>(filename: P) -> String {
     buf
 }
 
-fn parse_str(input: &str) -> Result<Ast, parser::Error> {
+fn parse_str(input: &str) -> Result<Ast<'_>, parser::Error<'_>> {
     parser::parse(scanner::sequence(input).unwrap())
 }
 
@@ -56,7 +56,7 @@ impl<'a> FilesystemPartialsResolver<'a> {
     fn new<T: Into<PathBuf>>(
         base_dir: T,
         dependencies: &mut Vec<String>,
-    ) -> FilesystemPartialsResolver {
+    ) -> FilesystemPartialsResolver<'_> {
         FilesystemPartialsResolver {
             base_dir: base_dir.into(),
             dependencies,
