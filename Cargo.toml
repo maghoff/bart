@@ -14,7 +14,7 @@ readme = "README.md"
 travis-ci = { repository = "maghoff/bart", branch = "master" }
 
 [dependencies]
-nom = "2.0.1"
+nom = "8.0.0"
 
 [dev-dependencies]
 

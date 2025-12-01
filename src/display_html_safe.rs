@@ -1,5 +1,11 @@
-use nom::*;
 use std::fmt::{self, Display, Write};
+
+use nom::{
+    branch::alt,
+    bytes::complete::{is_not, tag},
+    combinator::map,
+    IResult, Parser,
+};
 
 struct EscapingWriter<'a> {
     inner: &'a mut dyn Write,
@@ -11,20 +17,21 @@ impl<'a> EscapingWriter<'a> {
     }
 }
 
-named!(part(&str) -> &str,
-    alt!(
-        map!(tag!("<"), |_| "&lt;" ) |
-        map!(tag!("&"), |_| "&amp;" ) |
-        map!(tag!("\""), |_| "&quot;" ) |
-        map!(tag!("'"), |_| "&apos;" ) |
-        is_not!("<&\"'")
-    )
-);
+fn part(input: &str) -> IResult<&str, &str> {
+    alt((
+        map(tag("<"), |_| "&lt;"),
+        map(tag("&"), |_| "&amp;"),
+        map(tag("\""), |_| "&quot;"),
+        map(tag("'"), |_| "&apos;"),
+        is_not("<&\"'"),
+    ))
+    .parse(input)
+}
 
 impl<'a> Write for EscapingWriter<'a> {
     fn write_str(&mut self, buf: &str) -> fmt::Result {
         let mut rest = buf;
-        while let IResult::Done(new_rest, parsed) = part(rest) {
+        while let IResult::Ok((new_rest, parsed)) = part(rest) {
             self.inner.write_str(parsed)?;
             rest = new_rest;
         }
