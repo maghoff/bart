@@ -125,11 +125,9 @@ pub fn bart_display(input: TokenStream) -> TokenStream {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
-    let dummy_const = syn::Ident::new(format!("_IMPL_BART_DISPLAY_FOR_{}", &name));
-
     let gen = quote! {
         #[allow(non_upper_case_globals, unused_attributes, unused_qualifications, unknown_lints, clippy)]
-        const #dummy_const: () = {
+        const _: () = {
             extern crate bart as _bart;
 
             #[automatically_derived]
