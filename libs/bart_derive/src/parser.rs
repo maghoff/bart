@@ -3,6 +3,7 @@ use crate::token::*;
 use std::iter::*;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum Error<'a> {
     Mismatch {
         expected: &'static str,
