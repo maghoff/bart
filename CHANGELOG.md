@@ -2,6 +2,14 @@ Changelog
 =========
 This is a high-level overview of the changes that made it into a given version.
 
+Version 0.1.7
+-------------
+ * Upgrade nom from version 2 to version 8
+ * Many minor issues that have become compiler warnings have been addressed so the warnings
+   no longer show up
+
+Thanks to @jminer for these updates!
+
 Version 0.1.6
 -------------
  * Upgrade to syn 0.11.1. Version 0.10.5, which was previously used, has been yanked. This
