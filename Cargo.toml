@@ -6,7 +6,7 @@ categories = ["template-engine"]
 license = "MIT"
 name = "bart"
 repository = "https://github.com/maghoff/bart"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2021"
 readme = "README.md"
 
@@ -20,7 +20,7 @@ nom = "8.0.0"
 
 [dev-dependencies.bart_derive]
 path = "libs/bart_derive"
-version = "0.1.6"
+version = "0.1.7"
 
 [features]
 default = []
